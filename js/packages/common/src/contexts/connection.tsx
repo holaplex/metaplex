@@ -94,8 +94,11 @@ interface ConnectionConfig {
 
 const ConnectionContext = React.createContext<ConnectionConfig>({
   endpoint: DEFAULT,
-  setEndpoint: () => { },
-  connection: new Connection(DEFAULT, { commitment: 'recent', confirmTransactionInitialTimeout:  DEFAULT_CONNECTION_TIMEOUT }),
+  setEndpoint: () => {},
+  connection: new Connection(DEFAULT, {
+    commitment: 'recent',
+    confirmTransactionInitialTimeout: DEFAULT_CONNECTION_TIMEOUT,
+  }),
   env: ENDPOINTS[0].name,
   tokens: [],
   tokenMap: new Map<string, TokenInfo>(),
@@ -118,7 +121,11 @@ export function ConnectionProvider({
   const endpoint = queryEndpoint || savedEndpoint;
 
   const connection = useMemo(
-    () => new Connection(endpoint, { commitment: 'recent', confirmTransactionInitialTimeout: DEFAULT_CONNECTION_TIMEOUT }),
+    () =>
+      new Connection(endpoint, {
+        commitment: 'recent',
+        confirmTransactionInitialTimeout: DEFAULT_CONNECTION_TIMEOUT,
+      }),
     [endpoint],
   );
 
@@ -134,7 +141,7 @@ export function ConnectionProvider({
         .excludeByTag('nft')
         .filterByChainId(
           ENDPOINTS.find(end => end.endpoint === endpoint)?.ChainId ||
-          ChainId.MainnetBeta,
+            ChainId.MainnetBeta,
         )
         .getList();
 
@@ -154,7 +161,7 @@ export function ConnectionProvider({
   useEffect(() => {
     const id = connection.onAccountChange(
       Keypair.generate().publicKey,
-      () => { },
+      () => {},
     );
     return () => {
       connection.removeAccountChangeListener(id);
@@ -304,7 +311,7 @@ export const sendTransactions = async (
   signersSet: Keypair[][],
   sequenceType: SequenceType = SequenceType.Parallel,
   commitment: Commitment = 'singleGossip',
-  successCallback: (txid: string, ind: number) => void = () => { },
+  successCallback: (txid: string, ind: number) => void = () => {},
   failCallback: (reason: string, ind: number) => boolean = () => false,
   block?: BlockhashAndFeeCalculator,
 ): Promise<number> => {
@@ -351,6 +358,7 @@ export const sendTransactions = async (
     'vs handed in length',
     instructionSet.length,
   );
+
   for (let i = 0; i < signedTxns.length; i++) {
     const signedTxnPromise = sendSignedTransaction({
       connection,
@@ -362,7 +370,7 @@ export const sendTransactions = async (
         console.log(`Instructions set ${i} succeeded. Transaction Id ${txid}`);
         successCallback(txid, i);
       })
-      .catch((e) => {
+      .catch(e => {
         failCallback(e.message, i);
         console.log(`Instructions set ${i} failed.`);
         if (sequenceType === SequenceType.StopOnFailure) {
@@ -482,7 +490,7 @@ export const sendTransactionWithRetry = async (
   includesFeePayer: boolean = false,
   block?: BlockhashAndFeeCalculator,
   beforeSend?: () => void,
-): Promise<{ txid: string, slot: number }> => {
+): Promise<{ txid: string; slot: number }> => {
   if (!wallet.publicKey) throw new WalletNotConnectedError();
 
   let transaction = new Transaction();
@@ -540,16 +548,15 @@ export async function sendSignedTransaction({
   const rawTransaction = signedTransaction.serialize();
   let slot = 0;
 
-  const txid = await sendAndConfirmRawTransaction(
-    connection,
-    rawTransaction,
-    {
-      skipPreflight: true,
-      commitment: 'confirmed'
-    }
-  );
+  const txid = await sendAndConfirmRawTransaction(connection, rawTransaction, {
+    skipPreflight: true,
+    commitment: 'confirmed',
+  });
 
-  const confirmation = await connection.getConfirmedTransaction(txid, 'confirmed');
+  const confirmation = await connection.getConfirmedTransaction(
+    txid,
+    'confirmed',
+  );
 
   if (confirmation) {
     slot = confirmation.slot;

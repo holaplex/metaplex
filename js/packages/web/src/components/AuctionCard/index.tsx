@@ -489,9 +489,6 @@ export const AuctionCard = ({
     (auctionView.vault.info.state === VaultState.Deactivated &&
       isBidderPotEmpty);
 
-  if (shouldHide) {
-    return <></>;
-  }
 
   // Show the refund/reclaim/redeem bid button
   const showRedeemReclaimRefundBtn =
@@ -792,7 +789,7 @@ export const AuctionCard = ({
             </Button>
           )}
 
-          {showRedeemReclaimRefundBtn && redeemReclaimRefundBtn}
+          {redeemReclaimRefundBtn}
 
           {action}
 
