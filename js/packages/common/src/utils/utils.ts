@@ -190,13 +190,12 @@ export function fromLamports(
     return 0;
   }
 
-  const amount = Math.floor(
+  const amount =
     typeof account === 'number'
       ? account
       : BN.isBN(account)
       ? account.toNumber()
-      : account.info.amount.toNumber(),
-  );
+      : account.info.amount.toNumber();
 
   const precision = Math.pow(10, mint?.decimals || 9);
   return (amount / precision) * rate;
@@ -210,7 +209,7 @@ export const tryParseKey = (key: string): PublicKey | null => {
   }
 };
 
-export const formatAmount = (val: number): string => val.toLocaleString();
+export const formatAmount = (val: number) => val.toLocaleString();
 
 export function formatTokenAmount(
   account?: TokenAccount | number | BN,
