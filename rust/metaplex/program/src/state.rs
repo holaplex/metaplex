@@ -1552,7 +1552,7 @@ impl SafetyDepositConfigV2 {
     ) -> ProgramResult {
         let mut data = a.data.borrow_mut();
 
-        data[0] = Key::SafetyDepositConfigV1 as u8;
+        data[0] = Key::SafetyDepositConfigV2 as u8;
         // for whatever reason, copy_from_slice doesnt do jack here.
         let as_bytes = auction_manager_key.as_ref();
         for n in 0..32 {

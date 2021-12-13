@@ -5,7 +5,7 @@ use {
         error::MetaplexError,
         instruction::EmptyPaymentAccountArgs,
         state::{
-            get_auction_manager, AuctionManager, Key, PayoutTicket, SafetyDepositConfig,
+            get_auction_manager, AuctionManager, Key, PayoutTicket,
             SafetyDepositConfigV2, Store, MAX_PAYOUT_TICKET_SIZE, PREFIX, TOTALS,
         },
         utils::{

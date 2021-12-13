@@ -148,7 +148,7 @@ export const processMetaplexAccounts: ProcessAccountsFunc = async (
       }
     }
 
-    if (isSafetyDepositConfigV1Account(account)) {
+    if (isSafetyDepositConfigV2Account(account)) {
       const config = decodeSafetyDepositConfig(account.data);
       const parsedAccount: ParsedAccount<SafetyDepositConfigV2> = {
         pubkey,
@@ -221,8 +221,8 @@ const isPrizeTrackingTicketV1Account = (account: AccountInfo<Buffer>) =>
 const isStoreV1Account = (account: AccountInfo<Buffer>) =>
   account.data[0] === MetaplexKey.StoreV1;
 
-const isSafetyDepositConfigV1Account = (account: AccountInfo<Buffer>) =>
-  account.data[0] === MetaplexKey.SafetyDepositConfigV1;
+const isSafetyDepositConfigV2Account = (account: AccountInfo<Buffer>) =>
+  account.data[0] === MetaplexKey.SafetyDepositConfigV2;
 
 const isWhitelistedCreatorV1Account = (account: AccountInfo<Buffer>) =>
   account.data[0] === MetaplexKey.WhitelistedCreatorV1;
