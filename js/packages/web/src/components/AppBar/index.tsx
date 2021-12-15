@@ -1,6 +1,6 @@
 import { ConnectButton, useStore } from '@oyster/common';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { Col, Menu, Row, Space } from 'antd';
+import { Menu } from 'antd';
 import React, { ReactNode, useMemo } from 'react';
 import { Link, matchPath, useLocation } from 'react-router-dom';
 import { Cog, CurrentUserBadge } from '../CurrentUserBadge';
@@ -122,34 +122,28 @@ export const AppBar = (props: P) => {
 
   return (
     <>
-      <Row wrap={false} align="middle">
-        <Col flex="0 0 auto">
-          <Link to="/" id="metaplex-header-logo">
-            <img src={props.logo} />
-          </Link>
-        </Col>
-        <Col flex="1 0 0" style={{ overflow: 'hidden' }}>
+      <Link to="/" id="metaplex-header-logo">
+        <img src={props.logo} />
+      </Link>
+      <div className="all-menu-items-wrapper">
+        <div className="menu-wrapper">
           <Menu theme="dark" mode="horizontal" selectedKeys={activeItems}>
             {menuItems}
           </Menu>
-        </Col>
-        <Col flex="0 1 auto">
-          <Space className="metaplex-display-flex" align="center">
-            {connected ? (
-              <>
-                <CurrentUserBadge showAddress={true} buttonType="text" />
-                <Notifications buttonType="text" />
-                <Cog buttonType="text" />
-              </>
-            ) : (
-              <>
-                <HowToBuyModal buttonType="text" />
-                <ConnectButton type="text" allowWalletChange={false} />
-              </>
-            )}
-          </Space>
-        </Col>
-      </Row>
+        </div>
+        {connected ? (
+          <div className="logged-in-wrapper">
+            <CurrentUserBadge showAddress={true} buttonType="text" />
+            <Notifications buttonType="text" />
+            <Cog buttonType="text" />
+          </div>
+        ) : (
+          <div className="logged-in-wrapper">
+            <HowToBuyModal buttonType="text" />
+            <ConnectButton type="text" allowWalletChange={false} />
+          </div>
+        )}
+      </div>
     </>
   );
 };
