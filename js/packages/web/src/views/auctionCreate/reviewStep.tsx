@@ -29,6 +29,17 @@ const BASE_SAFETY_CONFIG_SIZE =
   8 + // collected to accept payment
   20; // padding
 
+const MAX_METADATA_PER_CACHE = 10;
+const MAX_AUCTION_CACHE_SIZE =
+  1 + //key
+  32 + //store
+  8 + // timestamp
+  4 + // metadata count
+  32 * MAX_METADATA_PER_CACHE + //metadata
+  32 + // auction
+  32 + // vault
+  32; // auction manager
+
 const calculateAuctionCreationCost = async (connection: Connection) => {
   const maxVaultSize =
     connection.getMinimumBalanceForRentExemption(MAX_VAULT_SIZE);
@@ -42,12 +53,17 @@ const calculateAuctionCreationCost = async (connection: Connection) => {
   const safetyDepositBoxCosts = connection.getMinimumBalanceForRentExemption(
     BASE_SAFETY_CONFIG_SIZE,
   );
+  // CACHE
+  const auctionCacheCosts = connection.getMinimumBalanceForRentExemption(
+    MAX_AUCTION_CACHE_SIZE,
+  );
   // There are probably a few more costs to account for, but this is a good start
   const allValues = await Promise.all([
     maxVaultSize,
     maxExternalAccountSize,
     auctionCosts,
     safetyDepositBoxCosts,
+    auctionCacheCosts,
   ]);
   return allValues.reduce((acc, curr) => acc + curr, 0);
 };
@@ -60,7 +76,7 @@ export const ReviewStep = (props: {
 }) => {
   const [cost, setCost] = useState(0);
   const item = props.attributes.items?.[0];
-  const [isLoadingCost, setIsLoadingCost] = useState(true);
+  const [isLoadingCost, setIsLoadingCost] = useState(false);
   useEffect(() => {
     if (!item) {
       return;
@@ -79,8 +95,8 @@ export const ReviewStep = (props: {
         const signatureCost =
           recentBlockhash.feeCalculator.lamportsPerSignature *
           /* 
-            Sorry about the magic number, but got it from testing
-            Ideally get filteredSigners, but from my testing they're usually 11 for this use case.
+            Sorry about the magic number Ideally get filteredSigners,
+            but from my testing they're usually 11 for this use case.
           */ 11;
         setCost((accountStorageCosts + signatureCost) / LAMPORTS_PER_SOL);
       } finally {
