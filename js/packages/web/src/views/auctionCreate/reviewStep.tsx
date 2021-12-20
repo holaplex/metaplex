@@ -1,10 +1,11 @@
+import { LoadingOutlined } from '@ant-design/icons';
+import { Button, Col, Divider, Row, Space, Statistic, Spin } from 'antd';
 import {
   MAX_AUCTION_DATA_EXTENDED_SIZE,
   MAX_EXTERNAL_ACCOUNT_SIZE,
   MAX_VAULT_SIZE,
 } from '@oyster/common';
 import { Connection, LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { Button, Col, Divider, Row, Space, Statistic } from 'antd';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { AuctionCategory, AuctionState } from '.';
@@ -59,21 +60,32 @@ export const ReviewStep = (props: {
 }) => {
   const [cost, setCost] = useState(0);
   const item = props.attributes.items?.[0];
-
+  const [isLoadingCost, setIsLoadingCost] = useState(true);
   useEffect(() => {
     if (!item) {
       return;
     }
     (async () => {
-      const accountStorageCosts = await calculateAuctionCreationCost(
-        props.connection,
-      );
-      // Ideally get filteredSigners, but from my testing they're usually 11 for this use case.
-      const recentBlockhash = await props.connection.getRecentBlockhash();
-      const signatureCost =
-        recentBlockhash.feeCalculator.lamportsPerSignature *
-        /* Sorry about the magic number, but got it from testing */ 11;
-      setCost((accountStorageCosts + signatureCost) / LAMPORTS_PER_SOL);
+      if (isLoadingCost) {
+        return;
+      }
+      try {
+        setIsLoadingCost(true);
+        const accountStorageCosts = await calculateAuctionCreationCost(
+          props.connection,
+        );
+
+        const recentBlockhash = await props.connection.getRecentBlockhash();
+        const signatureCost =
+          recentBlockhash.feeCalculator.lamportsPerSignature *
+          /* 
+            Sorry about the magic number, but got it from testing
+            Ideally get filteredSigners, but from my testing they're usually 11 for this use case.
+          */ 11;
+        setCost((accountStorageCosts + signatureCost) / LAMPORTS_PER_SOL);
+      } finally {
+        setIsLoadingCost(false);
+      }
     })();
   }, []);
 
@@ -101,14 +113,18 @@ export const ReviewStep = (props: {
             }
           />
           <Divider />
-          <AmountLabel
-            title={
-              props.attributes.category === AuctionCategory.InstantSale
-                ? 'Cost to Sell'
-                : 'Cost to Create Auction'
-            }
-            amount={cost}
-          />
+          {isLoadingCost ? (
+            <Spin indicator={<LoadingOutlined />} />
+          ) : (
+            <AmountLabel
+              title={
+                props.attributes.category === AuctionCategory.InstantSale
+                  ? 'Cost to Sell'
+                  : 'Cost to Create Auction'
+              }
+              amount={cost}
+            />
+          )}
         </Col>
       </Row>
       <div>
