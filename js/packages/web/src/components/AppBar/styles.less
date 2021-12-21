@@ -18,9 +18,9 @@ nav {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin-top: 0.3rem;
 
   @media (max-width: 800px) {
+    margin-top: 0.3rem;
     justify-content: center;
   }
 
@@ -34,28 +34,20 @@ nav {
   border-radius: 8px;
   border: 3px solid transparent;
   font-size: 0.95rem;
-  opacity: 0.7;
-
+  color: var(--text-color);
   line-height: 1;
+  transition: ease all 0.07s;
 
   &:hover,
   &.active {
     background-color: #7773;
-  }
-  &:hover:not(.active) {
-    opacity: 0.85;
+    color: var(--text-color);
   }
   &:focus {
     border: 3px solid #7775;
-    opacity: 0.85;
   }
-  &:active:not(.active) {
+  &:active {
     transform: scale(0.97);
-    opacity: 1;
-  }
-  &.active {
-    cursor: default;
-    pointer-events: none;
   }
 
   @media screen and (max-width: 450px) {

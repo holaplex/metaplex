@@ -263,7 +263,6 @@ export const ArtContent = ({
         'metaplex-square-aspect': squareAspect,
       })}
       ref={ref}
-      style={{ borderRadius: '8px' }}
     >
       {content}
     </div>
