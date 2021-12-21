@@ -1,25 +1,21 @@
 import { useStore } from '@oyster/common';
 import React, { useEffect } from 'react';
 import { LoadingOutlined } from '@ant-design/icons';
-import { Alert, Button, Spin, Anchor, Menu, Row, Col, Space, Typography } from 'antd';
+import { Alert, Button, Spin, Anchor, Menu } from 'antd';
 import { Link } from 'react-router-dom';
 import { useWallet } from '@solana/wallet-adapter-react';
-import {
-  useAuctionManagersToCache,
-} from '../../hooks';
+import { useAuctionManagersToCache } from '../../hooks';
 import { Banner } from './../../components/Banner';
 import { AuctionRenderCard } from '../../components/AuctionRenderCard';
 import { MetaplexMasonry } from './../../components/MetaplexMasonry';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
 import { useSearchParams } from 'react-router-dom';
-import {
-  useInfiniteScrollAuctions,
-} from '../../hooks';
+import { useInfiniteScrollAuctions, useWindowWidth } from '../../hooks';
 
 export const Listings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const view = searchParams.get("view") as string;
+  const view = searchParams.get('view') as string;
   const { ownerAddress, storefront } = useStore();
   const wallet = useWallet();
   const { auctionManagerTotal, auctionCacheTotal } =
@@ -40,7 +36,7 @@ export const Listings = () => {
 
   useEffect(() => {
     if (!view) {
-      setSearchParams({ view: "live" });
+      setSearchParams({ view: 'live' });
     }
   }, [view]);
 
@@ -88,17 +84,12 @@ export const Listings = () => {
             setSearchParams({ view: e.key });
           }}
           selectedKeys={[view]}
-          mode="horizontal"
+          mode={useWindowWidth() > 450 ? 'horizontal' : 'vertical'}
+          style={{ marginBottom: '1rem' }}
         >
-          <Menu.Item key="live">
-            Live
-          </Menu.Item>
-          <Menu.Item key="resale">
-            Secondary Listings
-          </Menu.Item>
-          <Menu.Item key="ended">
-            Ended
-          </Menu.Item>
+          <Menu.Item key="live">Live</Menu.Item>
+          <Menu.Item key="resale">Secondary Listings</Menu.Item>
+          <Menu.Item key="ended">Ended</Menu.Item>
         </Menu>
       </Anchor>
       {initLoading ? (
@@ -108,7 +99,7 @@ export const Listings = () => {
       ) : (
         <>
           <MetaplexMasonry>
-            {auctions.map((m) => {
+            {auctions.map(m => {
               const id = m.auction.pubkey;
               return (
                 <Link to={`/listings/${id}`} key={id}>

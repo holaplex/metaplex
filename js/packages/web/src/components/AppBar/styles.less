@@ -1,7 +1,101 @@
+nav {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 1rem 1.5rem;
+  gap: 1rem;
+
+  @media (max-width: 800px) {
+    flex-direction: column;
+  }
+  @media screen and (max-width: 600px) {
+    margin: 0.65rem;
+  }
+}
+
+.nav-menu-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 0.3rem;
+
+  @media (max-width: 800px) {
+    justify-content: center;
+  }
+
+  @media screen and (max-width: 450px) {
+    margin-top: 0.5rem;
+  }
+}
+
+.nav-menu-item {
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  border: 3px solid transparent;
+  font-size: 0.95rem;
+  opacity: 0.7;
+
+  line-height: 1;
+
+  &:hover,
+  &.active {
+    background-color: #7773;
+  }
+  &:hover:not(.active) {
+    opacity: 0.85;
+  }
+  &:focus {
+    border: 3px solid #7775;
+    opacity: 0.85;
+  }
+  &:active:not(.active) {
+    transform: scale(0.97);
+    opacity: 1;
+  }
+  &.active {
+    cursor: default;
+    pointer-events: none;
+  }
+
+  @media screen and (max-width: 450px) {
+    font-size: 0.9rem;
+    padding: 0.43rem 0.7rem;
+  }
+}
+
 #metaplex-header-logo {
-  margin-right: 32px;
+  margin: 0 auto;
   img {
     object-fit: contain;
     width: 50px;
+    border-radius: 8px;
+    @media (max-width: 800px) {
+      width: auto;
+      max-width: 100px;
+      margin: 1rem auto 0.5rem;
+    }
   }
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.nav-right {
+  display: flex;
+  flex-grow: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+
+  @media (max-width: 800px) {
+    flex-direction: column-reverse;
+    width: 100%;
+  }
+}
+
+.wallet-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
 }

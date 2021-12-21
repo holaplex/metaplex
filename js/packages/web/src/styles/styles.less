@@ -109,3 +109,62 @@ h5,
 h6 {
   font-family: @theme-family-title;
 }
+
+// ANT MENU STYLING
+
+.metaplex-menu-pills {
+  padding: 12px 0;
+  &.ant-menu {
+    border: none;
+    gap: 12px;
+    &::before,
+    &::after {
+      display: none;
+    }
+    overflow: auto !important;
+    display: flex;
+    flex-wrap: wrap;
+    > .ant-menu-item {
+      border-radius: 8px;
+      margin: 0;
+      &::after {
+        border-bottom: none;
+      }
+      &:hover,
+      &.ant-menu-item-selected {
+        background-color: @theme-color-base-bold;
+        color: @theme-color-text;
+        &::after {
+          border-bottom: none;
+        }
+        * {
+          color: inherit;
+        }
+      }
+      &.ant-menu-item-active {
+        &::after {
+          border-bottom: none;
+        }
+      }
+      &:active {
+        transform: scale(0.97);
+      }
+      > * {
+        transition: none !important;
+      }
+    }
+  }
+  &.ant-menu-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+@media screen and (max-width: 900px) {
+  .ant-menu-horizontal {
+    line-height: 1 !important;
+    > .ant-menu-item {
+      padding: 10px 14px !important;
+    }
+  }
+}
