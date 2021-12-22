@@ -1,5 +1,4 @@
 import React from 'react';
-import { Space, Button } from 'antd';
 import { useArt } from '../../hooks';
 import { useConnectionConfig } from '@oyster/common';
 import { Art } from '../../types';
@@ -11,24 +10,19 @@ export const ViewOn = (props: ViewOnProps) => {
   const art = props.art ?? useArt(props.id);
 
   return (
-    <Space direction="vertical" size="small">
-      <Space direction="horizontal">
-        <Button onClick={() => window.open(art.uri || '', '_blank')}>
-          Metadata
-        </Button>
-        <Button
-          onClick={() =>
-            window.open(
-              `https://explorer.solana.com/account/${art?.mint || ''}${
-                env.indexOf('main') >= 0 ? '' : `?cluster=${env}`
-              }`,
-              '_blank',
-            )
-          }
-        >
-          Transaction
-        </Button>
-      </Space>
-    </Space>
+    <div className="nft-info-links-wrapper">
+      <a href={art.uri || ''} target="_blank" rel="noreferrer">
+        Metadata
+      </a>
+      <a
+        href={`https://explorer.solana.com/account/${art?.mint || ''}${
+          env.indexOf('main') >= 0 ? '' : `?cluster=${env}`
+        }`}
+        target="_blank"
+        rel="noreferrer"
+      >
+        Transaction
+      </a>
+    </div>
   );
 };

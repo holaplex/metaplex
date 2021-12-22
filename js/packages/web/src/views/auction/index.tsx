@@ -202,25 +202,24 @@ export const AuctionView = () => {
       </Col>
 
       <Col span={24} lg={{ offset: 1, span: 13 }}>
-        <Row justify="space-between">
-          <h2>{art.title || <Skeleton paragraph={{ rows: 0 }} />}</h2>
-          <ViewOn art={art} />
-        </Row>
         {wallet.publicKey?.toBase58() === auction?.auctionManager.authority && (
           <Link to={`/listings/${id}/billing`}>
-            <Button type="ghost">Auction Settlement</Button>
+            <Button type="ghost" style={{ marginBottom: '1rem' }}>
+              Billing / Settlement
+            </Button>
           </Link>
         )}
+        <div className="title-row">
+          <h2>{art.title || <Skeleton paragraph={{ rows: 0 }} />}</h2>
+          <ViewOn art={art} />
+        </div>
         <Row className="metaplex-spacing-bottom-lg">
           <div className="info-items-wrapper">
             <div className="info-item-wrapper">
               <span className="item-title">
                 {creators.length > 1 ? 'Creators' : 'Creator'}
               </span>
-              {[
-                { address: 'Ck6aTAi4qkXR3JTihXZbdcGqnTvvFa2GdNkXeHDnF84o' },
-                { address: 'Ck6aTAi4qkXR3JTihXZbdcGqnTvvFa2GdNkXeHDnF84o' },
-              ].map(creator => (
+              {creators.map(creator => (
                 <span className="info-address" key={creator.address}>
                   {shortenAddress(creator.address || '')}
                 </span>
@@ -245,7 +244,7 @@ export const AuctionView = () => {
               </span>
             </div>
             <div className="info-item-wrapper">
-              <span className="item-title">NFTS</span>
+              <span className="item-title">NFTs</span>
               {nftCount === undefined ? (
                 <Skeleton paragraph={{ rows: 0 }} />
               ) : (
