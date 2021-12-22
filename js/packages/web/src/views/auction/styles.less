@@ -1,12 +1,28 @@
 .auction-bid {
-    &-line-item {
-        &-is-canceled {
-            .ant-statistic-content-value {
-                text-decoration: line-through;
-            }
-        }
+  &-line-item {
+    &-is-canceled {
+      .ant-statistic-content-value {
+        text-decoration: line-through;
+      }
     }
-    &-last-winner {
-        border-bottom: 1px solid @theme-color-base-bold;
-    }
+  }
+  &-last-winner {
+    border-bottom: 1px solid @theme-color-base-bold;
+  }
+}
+
+.info-items-wrapper {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.info-item-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 10rem;
+}
+
+.item-title {
+  font-weight: bold;
 }

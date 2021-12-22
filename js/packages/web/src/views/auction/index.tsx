@@ -49,7 +49,6 @@ import { AmountLabel } from '../../components/AmountLabel';
 import { ArtContent } from '../../components/ArtContent';
 import { AuctionCard } from '../../components/AuctionCard';
 import { ClickToCopy } from '../../components/ClickToCopy';
-import { MetaAvatar } from '../../components/MetaAvatar';
 import { ViewOn } from '../../components/ViewOn';
 import { some } from 'lodash';
 import {
@@ -177,8 +176,7 @@ export const AuctionView = () => {
           {items}
         </Carousel>
         <Space direction="vertical" size="small">
-          <Text>ABOUT THIS {nftCount === 1 ? 'NFT' : 'COLLECTION'}</Text>
-          <p>
+          <p style={{ padding: '0 8px' }}>
             {hasDescription && <Skeleton paragraph={{ rows: 3 }} />}
             {description ||
               (winnerCount !== undefined && (
@@ -206,53 +204,55 @@ export const AuctionView = () => {
       <Col span={24} lg={{ offset: 1, span: 13 }}>
         <Row justify="space-between">
           <h2>{art.title || <Skeleton paragraph={{ rows: 0 }} />}</h2>
-          {wallet.publicKey?.toBase58() ===
-            auction?.auctionManager.authority && (
-            <Link to={`/listings/${id}/billing`}>
-              <Button type="ghost">Billing</Button>
-            </Link>
-          )}
+          <ViewOn art={art} />
         </Row>
+        {wallet.publicKey?.toBase58() === auction?.auctionManager.authority && (
+          <Link to={`/listings/${id}/billing`}>
+            <Button type="ghost">Auction Settlement</Button>
+          </Link>
+        )}
         <Row className="metaplex-spacing-bottom-lg">
-          <Col span={12}>
-            <Space direction="horizontal" align="start">
-              <Space direction="vertical" size="small">
-                <Text>CREATED BY</Text>
-                <MetaAvatar creators={creators} />
-              </Space>
-              <Space direction="vertical" size="small">
-                <Text>Edition</Text>
-                {(auction?.items.length || 0) > 1
-                  ? 'Multiple'
-                  : edition === 'NFT 0'
-                  ? 'Master'
-                  : edition}
-              </Space>
-              <Space direction="vertical" size="small">
-                <Text>Winners</Text>
-                <span>
-                  {winnerCount === undefined ? (
-                    <Skeleton paragraph={{ rows: 0 }} />
-                  ) : (
-                    winnerCount
-                  )}
+          <div className="info-items-wrapper">
+            <div className="info-item-wrapper">
+              <span className="item-title">
+                {creators.length > 1 ? 'Creators' : 'Creator'}
+              </span>
+              {[
+                { address: 'Ck6aTAi4qkXR3JTihXZbdcGqnTvvFa2GdNkXeHDnF84o' },
+                { address: 'Ck6aTAi4qkXR3JTihXZbdcGqnTvvFa2GdNkXeHDnF84o' },
+              ].map(creator => (
+                <span className="info-address" key={creator.address}>
+                  {shortenAddress(creator.address || '')}
                 </span>
-              </Space>
-              <Space direction="vertical" size="small">
-                <Text>NFTS</Text>
-                {nftCount === undefined ? (
+              ))}
+            </div>
+            <div className="info-item-wrapper">
+              <span className="item-title">Edition</span>
+              {(auction?.items.length || 0) > 1
+                ? 'Multiple'
+                : edition === 'NFT 0'
+                ? 'Master'
+                : edition}
+            </div>
+            <div className="info-item-wrapper">
+              <span className="item-title">Winners</span>
+              <span>
+                {winnerCount === undefined ? (
                   <Skeleton paragraph={{ rows: 0 }} />
                 ) : (
-                  nftCount
+                  winnerCount
                 )}
-              </Space>
-            </Space>
-          </Col>
-          <Col span={12}>
-            <Row justify="end">
-              <ViewOn art={art} />
-            </Row>
-          </Col>
+              </span>
+            </div>
+            <div className="info-item-wrapper">
+              <span className="item-title">NFTS</span>
+              {nftCount === undefined ? (
+                <Skeleton paragraph={{ rows: 0 }} />
+              ) : (
+                nftCount
+              )}
+            </div>
+          </div>
         </Row>
 
         {!auction && <Skeleton paragraph={{ rows: 6 }} />}

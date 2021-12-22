@@ -27,15 +27,13 @@ export const ArtistCard = ({
         </div>
       }
       bordered={false}
+      style={{ borderRadius: '8px' }}
     >
       <div className="content-wrapper">
-        <MetaAvatar creators={[artist]} size={64} />
+        <MetaAvatar creators={[artist]} size={40} />
         {artist.name || shortenAddress(artist.address || '')}
       </div>
-      {artist.about ||
-        (true && (
-          <div className="about">Testing artist about{artist.about}</div>
-        ))}
+      {artist.about && <div className="about">{artist.about}</div>}
     </Card>
   );
 };
