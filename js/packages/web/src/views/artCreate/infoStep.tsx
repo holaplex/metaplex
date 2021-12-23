@@ -1,15 +1,19 @@
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { IMetadataExtension } from '@oyster/common';
-import { Button, Col, Form, Input, InputNumber, Row, Space } from 'antd';
+import { Button, Col, Form, Input, InputNumber, Row, Space, Radio } from 'antd';
 import React from 'react';
 import { useArtworkFiles } from '.';
 import { ArtCard } from '../../components/ArtCard';
 import { useState } from 'react';
 
+interface IMetadataExtensionPlus extends IMetadataExtension {
+  maxSupplyType?: number;
+}
+
 export const InfoStep = (props: {
-  attributes: IMetadataExtension;
+  attributes: IMetadataExtensionPlus;
   files: File[];
-  setAttributes: (attr: IMetadataExtension) => void;
+  setAttributes: (attr: IMetadataExtensionPlus) => void;
   confirm: () => void;
 }) => {
   const { image, animation_url } = useArtworkFiles(
@@ -17,8 +21,24 @@ export const InfoStep = (props: {
     props.attributes,
   );
   const [form] = Form.useForm();
+  const [maxSupplyType, setMaxSupplyType] = useState(
+    props.attributes.maxSupplyType || 0,
+  );
 
-  const [values, setValues] = useState<IMetadataExtension>(props.attributes);
+  const getNestedMaxSupply = (maxSupplyType: number) => {
+    const maxSupply = form.getFieldsValue().properties?.maxSupply;
+
+    return {
+      maxSupply:
+        maxSupplyType === 0
+          ? 0
+          : maxSupplyType === 1
+          ? maxSupply === 0 || !maxSupply
+            ? 1
+            : maxSupply
+          : undefined,
+    };
+  };
 
   return (
     <Space className="metaplex-fullwidth" direction="vertical">
@@ -35,7 +55,7 @@ export const InfoStep = (props: {
         form={form}
         autoComplete="off"
         onValuesChange={field => {
-          setValues({ ...values, ...field });
+          props.setAttributes({ ...props.attributes, ...field });
         }}
         initialValues={props.attributes}
         onFinish={formState => {
@@ -54,6 +74,7 @@ export const InfoStep = (props: {
             properties: {
               ...props.attributes.properties,
               ...formState.properties,
+              ...getNestedMaxSupply(maxSupplyType),
             },
             attributes: nftAttributes,
           });
@@ -68,7 +89,7 @@ export const InfoStep = (props: {
                 image={image}
                 animationURL={animation_url}
                 category={props.attributes.properties?.category}
-                name={values.name}
+                name={props.attributes.name}
                 small={true}
               />
             )}
@@ -120,24 +141,46 @@ export const InfoStep = (props: {
               </label>
 
               <label>
-                <h3>Maximum Supply</h3>
-                <p
-                  style={{
-                    opacity: '0.85',
-                    margin: '-4px 0 0',
-                    paddingBottom: '10px',
-                  }}
-                >
-                  <strong>NOTE:</strong> If this field is left blank, it will be
-                  possible to mint an unlimited number of editions of this NFT.
-                </p>
-                <Form.Item name={['properties', 'maxSupply']}>
-                  <InputNumber
-                    className="metaplex-fullwidth"
-                    placeholder="Quantity"
-                  />
+                <h3>Mint Type</h3>
+                <Form.Item name={['maxSupplyType']}>
+                  <Radio.Group
+                    onChange={e => {
+                      setMaxSupplyType(e.target.value);
+                      const newValues = {
+                        ...props.attributes,
+                        maxSupplyType: e.target.value,
+                        properties: {
+                          ...props.attributes.properties,
+                          ...getNestedMaxSupply(e.target.value),
+                        },
+                      };
+                      props.setAttributes(newValues);
+                      form.setFieldsValue(newValues);
+                    }}
+                    value={maxSupplyType}
+                    defaultValue={0}
+                  >
+                    <Radio value={0}>One of One</Radio>
+                    <Radio value={1}>Limited Edition</Radio>
+                    <Radio value={2}>Unlimited</Radio>
+                  </Radio.Group>
                 </Form.Item>
               </label>
+
+              {maxSupplyType === 1 && (
+                <label>
+                  <h3>Maximum Supply</h3>
+                  <Form.Item name={['properties', 'maxSupply']}>
+                    <InputNumber
+                      className="metaplex-fullwidth"
+                      placeholder="Number of Editions"
+                      defaultValue={1}
+                      min={1}
+                    />
+                  </Form.Item>
+                </label>
+              )}
+
               <label>
                 <h3>Attributes</h3>
               </label>
