@@ -53,7 +53,6 @@ export const ArtCreateView = () => {
     seller_fee_basis_points: 0,
     creators: [],
     properties: {
-      maxSupply: 0,
       files: [],
       category: MetadataCategory.Image,
     },

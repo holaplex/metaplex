@@ -121,6 +121,16 @@ export const InfoStep = (props: {
 
               <label>
                 <h3>Maximum Supply</h3>
+                <p
+                  style={{
+                    opacity: '0.85',
+                    margin: '-4px 0 0',
+                    paddingBottom: '10px',
+                  }}
+                >
+                  <strong>NOTE:</strong> If this field is left blank, it will be
+                  possible to mint an unlimited number of editions of this NFT.
+                </p>
                 <Form.Item name={['properties', 'maxSupply']}>
                   <InputNumber
                     className="metaplex-fullwidth"
