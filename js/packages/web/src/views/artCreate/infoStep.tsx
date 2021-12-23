@@ -82,7 +82,7 @@ export const InfoStep = (props: {
           props.confirm();
         }}
       >
-        <Row justify="space-between" align="middle" wrap={false}>
+        <Row justify="space-between" wrap={false}>
           <Col span={6}>
             {props.attributes.image && (
               <ArtCard
@@ -173,7 +173,6 @@ export const InfoStep = (props: {
                   <Form.Item name={['properties', 'maxSupply']}>
                     <InputNumber
                       className="metaplex-fullwidth"
-                      placeholder="Number of Editions"
                       defaultValue={1}
                       min={1}
                     />
