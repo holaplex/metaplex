@@ -98,6 +98,7 @@ export const AuctionView = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const art = useArt(auction?.thumbnail.metadata.pubkey);
   const { data } = useExtendedArt(auction?.thumbnail.metadata.pubkey);
+  console.log(auction);
   const creators = useCreators(auction);
   const wallet = useWallet();
   let edition = '';
@@ -110,6 +111,8 @@ export const AuctionView = () => {
   }
   const nftCount = auction?.items.flat().length;
   const winnerCount = auction?.items.length;
+
+  console.log(auction?.thumbnail.metadata.pubkey);
 
   const description = data?.description;
   const attributes = data?.attributes;
@@ -164,7 +167,7 @@ export const AuctionView = () => {
     );
   });
 
-  const getCarousel = (className: string) => (
+  const getArt = (className: string) => (
     <div className={className}>
       <Carousel
         className="metaplex-spacing-bottom-md"
@@ -179,7 +182,7 @@ export const AuctionView = () => {
   return (
     <div className="item-page-wrapper">
       <div className="item-page-left">
-        {getCarousel('art-desktop')}
+        {getArt('art-desktop')}
         <p style={{ padding: '0 8px' }} className="art-desktop">
           {description}
         </p>
@@ -202,11 +205,11 @@ export const AuctionView = () => {
 
       <div className="item-page-right">
         <div className="title-row">
-          <h2>{art.title || <Skeleton paragraph={{ rows: 0 }} />}</h2>
+          <h1>{art.title || <Skeleton paragraph={{ rows: 0 }} />}</h1>
           <ViewOn art={art} />
         </div>
 
-        {getCarousel('art-mobile')}
+        {getArt('art-mobile')}
 
         {wallet.publicKey?.toBase58() === auction?.auctionManager.authority && (
           <Link to={`/listings/${id}/billing`}>

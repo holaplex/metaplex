@@ -6,7 +6,7 @@ import {
   loadMultipleAccounts,
 } from '@oyster/common';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { Button, Col, List, Row, Skeleton, Space, Tag, Typography } from 'antd';
+import { Button, List, Skeleton, Tag, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { sendSignMetadata } from '../../actions/sendSignMetadata';
@@ -42,7 +42,7 @@ export const ArtView = () => {
   } else if (art.type === ArtType.Print) {
     badge = `${art.edition} of ${art.supply}`;
   }
-  const { ref, data } = useExtendedArt(nft);
+  const { data } = useExtendedArt(nft);
 
   useEffect(() => {
     (async () => {
@@ -85,47 +85,54 @@ export const ArtView = () => {
     </>
   );
 
+  const getArt = (className: string) => (
+    <div className={className}>
+      <ArtContent
+        pubkey={nft}
+        active={true}
+        allowMeshRender={true}
+        artView={true}
+        backdrop="dark"
+        square={false}
+      />
+    </div>
+  );
+
   return (
-    <Row justify="center" ref={ref} gutter={[48, 0]}>
-      <Col span={24} md={{ span: 20 }} lg={9}>
-        <ArtContent
-          pubkey={nft}
-          active={true}
-          allowMeshRender={true}
-          artView={true}
-          backdrop="dark"
-          square={false}
-        />
+    <div className="item-page-wrapper">
+      <div className="item-page-left">
+        {getArt('art-desktop')}
         {art.creators?.find(c => !c.verified) && unverified}
-        <Space direction="vertical" size="small">
-          <p style={{ padding: '1rem 8px' }}>{description}</p>
-        </Space>
-        <Col span="24">
-          {attributes && (
-            <div>
-              <Text>Attributes</Text>
-              <List grid={{ column: 4 }}>
-                {attributes.map((attribute, i) => {
-                  return (
-                    <List.Item key={i}>
-                      <List.Item.Meta
-                        title={attribute.trait_type}
-                        description={attribute.value}
-                      />
-                    </List.Item>
-                  );
-                })}
-              </List>
-            </div>
-          )}
-        </Col>
-      </Col>
-      <Col span={24} lg={{ offset: 1, span: 13 }}>
+        <p style={{ padding: '1rem 8px' }} className="art-desktop">
+          {description}
+        </p>
+        {attributes && (
+          <div>
+            <Text>Attributes</Text>
+            <List grid={{ column: 4 }}>
+              {attributes.map((attribute, i) => {
+                return (
+                  <List.Item key={i}>
+                    <List.Item.Meta
+                      title={attribute.trait_type}
+                      description={attribute.value}
+                    />
+                  </List.Item>
+                );
+              })}
+            </List>
+          </div>
+        )}
+      </div>
+      <div className="item-page-right">
         <div className="title-row">
           <h1>{art.title || <Skeleton paragraph={{ rows: 0 }} />}</h1>
           <ViewOn id={nft} />
         </div>
-        <Row className="metaplex-spacing-bottom-lg">
+
+        {getArt('art-mobile')}
+
+        <div className="info-outer-wrapper">
           <div className="info-items-wrapper">
             <div className="info-item-wrapper">
               <span className="item-title">Royalties</span>
@@ -136,7 +143,7 @@ export const ArtView = () => {
               <span className="item-title">
                 {art?.creators?.length || 0 > 1 ? 'Creators' : 'Creator'}
               </span>
-              {(art.creators || []).map((creator, idx) => {
+              {(art.creators || []).map(creator => {
                 return (
                   <>
                     {creator.name || shortenAddress(creator.address || '')}
@@ -208,7 +215,7 @@ export const ArtView = () => {
               </div>
             )}
           </div>
-        </Row>
+        </div>
         {/* <Button
                   onClick={async () => {
                     if(!art.mint) {
@@ -241,7 +248,7 @@ export const ArtView = () => {
           key={remountArtMinting}
           onMint={async () => await setRemountArtMinting(prev => prev + 1)}
         />
-      </Col>
-    </Row>
+      </div>
+    </div>
   );
 };
