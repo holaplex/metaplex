@@ -97,7 +97,7 @@ export const AuctionView = () => {
   const { patchState } = useMeta();
   const [currentIndex, setCurrentIndex] = useState(0);
   const art = useArt(auction?.thumbnail.metadata.pubkey);
-  const { ref, data } = useExtendedArt(auction?.thumbnail.metadata.pubkey);
+  const { data } = useExtendedArt(auction?.thumbnail.metadata.pubkey);
   const creators = useCreators(auction);
   const wallet = useWallet();
   let edition = '';
@@ -111,7 +111,6 @@ export const AuctionView = () => {
   const nftCount = auction?.items.flat().length;
   const winnerCount = auction?.items.length;
 
-  const hasDescription = data === undefined || data.description === undefined;
   const description = data?.description;
   const attributes = data?.attributes;
 
@@ -165,25 +164,25 @@ export const AuctionView = () => {
     );
   });
 
+  const getCarousel = (className: string) => (
+    <div className={className}>
+      <Carousel
+        className="metaplex-spacing-bottom-md"
+        autoplay={false}
+        afterChange={index => setCurrentIndex(index)}
+      >
+        {items}
+      </Carousel>
+    </div>
+  );
+
   return (
-    <Row justify="center" ref={ref} gutter={[48, 0]}>
-      <Col span={24} md={{ span: 20 }} lg={9}>
-        <Carousel
-          className="metaplex-spacing-bottom-md"
-          autoplay={false}
-          afterChange={index => setCurrentIndex(index)}
-        >
-          {items}
-        </Carousel>
-        <Space direction="vertical" size="small">
-          <p style={{ padding: '0 8px' }}>
-            {hasDescription && <Skeleton paragraph={{ rows: 3 }} />}
-            {description ||
-              (winnerCount !== undefined && (
-                <div>No description provided.</div>
-              ))}
-          </p>
-        </Space>
+    <div className="item-page-wrapper">
+      <div className="item-page-left">
+        {getCarousel('art-desktop')}
+        <p style={{ padding: '0 8px' }} className="art-desktop">
+          {description}
+        </p>
         {attributes && (
           <div>
             <Text>Attributes</Text>
@@ -199,21 +198,25 @@ export const AuctionView = () => {
             </List>
           </div>
         )}
-      </Col>
+      </div>
 
-      <Col span={24} lg={{ offset: 1, span: 13 }}>
-        {wallet.publicKey?.toBase58() === auction?.auctionManager.authority && (
-          <Link to={`/listings/${id}/billing`}>
-            <Button type="ghost" style={{ marginBottom: '1rem' }}>
-              Billing / Settlement
-            </Button>
-          </Link>
-        )}
+      <div className="item-page-right">
         <div className="title-row">
           <h2>{art.title || <Skeleton paragraph={{ rows: 0 }} />}</h2>
           <ViewOn art={art} />
         </div>
-        <Row className="metaplex-spacing-bottom-lg">
+
+        {getCarousel('art-mobile')}
+
+        {wallet.publicKey?.toBase58() === auction?.auctionManager.authority && (
+          <Link to={`/listings/${id}/billing`}>
+            <Button type="ghost" style={{ marginBottom: '2rem' }}>
+              Billing / Settlement
+            </Button>
+          </Link>
+        )}
+
+        <div className="info-outer-wrapper">
           <div className="info-items-wrapper">
             <div className="info-item-wrapper">
               <span className="item-title">
@@ -227,11 +230,13 @@ export const AuctionView = () => {
             </div>
             <div className="info-item-wrapper">
               <span className="item-title">Edition</span>
-              {(auction?.items.length || 0) > 1
-                ? 'Multiple'
-                : edition === 'NFT 0'
-                ? 'Master'
-                : edition}
+              <span>
+                {(auction?.items.length || 0) > 1
+                  ? 'Multiple'
+                  : edition === 'NFT 0'
+                  ? 'Master'
+                  : edition}
+              </span>
             </div>
             <div className="info-item-wrapper">
               <span className="item-title">Winners</span>
@@ -245,22 +250,24 @@ export const AuctionView = () => {
             </div>
             <div className="info-item-wrapper">
               <span className="item-title">NFTs</span>
-              {nftCount === undefined ? (
-                <Skeleton paragraph={{ rows: 0 }} />
-              ) : (
-                nftCount
-              )}
+              <span>
+                {nftCount === undefined ? (
+                  <Skeleton paragraph={{ rows: 0 }} />
+                ) : (
+                  nftCount
+                )}
+              </span>
             </div>
           </div>
-        </Row>
+        </div>
 
         {!auction && <Skeleton paragraph={{ rows: 6 }} />}
         {auction && (
           <AuctionCard auctionView={auction} hideDefaultAction={false} />
         )}
         {!auction?.isInstantSale && <AuctionBids auctionView={auction} />}
-      </Col>
-    </Row>
+      </div>
+    </div>
   );
 };
 
