@@ -98,10 +98,10 @@ export const getStorefront = async (
 
   const client = createClient({
     url: REDIS_URL,
-    socket: {
-      tls: true,
-      rejectUnauthorized: false,
-    },
+    // socket: {
+    //   // tls: true,
+    //   rejectUnauthorized: false,
+    // },
   });
 
   await client.connect();

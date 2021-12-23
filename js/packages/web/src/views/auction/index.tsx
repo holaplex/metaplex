@@ -98,7 +98,6 @@ export const AuctionView = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const art = useArt(auction?.thumbnail.metadata.pubkey);
   const { data } = useExtendedArt(auction?.thumbnail.metadata.pubkey);
-  console.log(auction);
   const creators = useCreators(auction);
   const wallet = useWallet();
   let edition = '';
@@ -112,7 +111,7 @@ export const AuctionView = () => {
   const nftCount = auction?.items.flat().length;
   const winnerCount = auction?.items.length;
 
-  console.log(auction?.thumbnail.metadata.pubkey);
+  const hasDescription = data === undefined || data.description === undefined;
 
   const description = data?.description;
   const attributes = data?.attributes;
@@ -185,6 +184,11 @@ export const AuctionView = () => {
         {getArt('art-desktop')}
         <p style={{ padding: '0 8px' }} className="art-desktop">
           {description}
+        </p>
+        <p>
+          {hasDescription && <Skeleton paragraph={{ rows: 3 }} />}
+          {description ||
+            (winnerCount !== undefined && <div>No description provided.</div>)}
         </p>
         {attributes && (
           <div>
