@@ -97,7 +97,7 @@ export const AuctionView = () => {
   const { patchState } = useMeta();
   const [currentIndex, setCurrentIndex] = useState(0);
   const art = useArt(auction?.thumbnail.metadata.pubkey);
-  const { data } = useExtendedArt(auction?.thumbnail.metadata.pubkey);
+  const { ref, data } = useExtendedArt(auction?.thumbnail.metadata.pubkey);
   const creators = useCreators(auction);
   const wallet = useWallet();
   let edition = '';
@@ -110,8 +110,6 @@ export const AuctionView = () => {
   }
   const nftCount = auction?.items.flat().length;
   const winnerCount = auction?.items.length;
-
-  const hasDescription = data === undefined || data.description === undefined;
 
   const description = data?.description;
   const attributes = data?.attributes;
@@ -178,33 +176,33 @@ export const AuctionView = () => {
     </div>
   );
 
+  const getDescriptionAndAttributes = (className: string) => (
+    <div className={className}>
+      <p style={{ padding: '0 8px' }}>{description}</p>
+
+      {attributes && (
+        <div>
+          <Text>Attributes</Text>
+          <List grid={{ column: 4 }}>
+            {attributes.map((attribute, index) => (
+              <List.Item key={`${attribute.value}-${index}`}>
+                <List.Item.Meta
+                  title={attribute.trait_type}
+                  description={attribute.value}
+                />
+              </List.Item>
+            ))}
+          </List>
+        </div>
+      )}
+    </div>
+  );
+
   return (
-    <div className="item-page-wrapper">
+    <div className="item-page-wrapper" ref={ref}>
       <div className="item-page-left">
         {getArt('art-desktop')}
-        <p style={{ padding: '0 8px' }} className="art-desktop">
-          {description}
-        </p>
-        <p>
-          {hasDescription && <Skeleton paragraph={{ rows: 3 }} />}
-          {description ||
-            (winnerCount !== undefined && <div>No description provided.</div>)}
-        </p>
-        {attributes && (
-          <div>
-            <Text>Attributes</Text>
-            <List grid={{ column: 4 }}>
-              {attributes.map((attribute, index) => (
-                <List.Item key={`${attribute.value}-${index}`}>
-                  <List.Item.Meta
-                    title={attribute.trait_type}
-                    description={attribute.value}
-                  />
-                </List.Item>
-              ))}
-            </List>
-          </div>
-        )}
+        {getDescriptionAndAttributes('art-desktop')}
       </div>
 
       <div className="item-page-right">
@@ -214,6 +212,7 @@ export const AuctionView = () => {
         </div>
 
         {getArt('art-mobile')}
+        {getDescriptionAndAttributes('art-mobile')}
 
         {wallet.publicKey?.toBase58() === auction?.auctionManager.authority && (
           <Link to={`/listings/${id}/billing`}>
