@@ -60,7 +60,6 @@ export const AppBar = (props: P) => {
         <div className="nav-right">
           <div className="nav-menu-wrapper">
             {menu.map(({ key, link, title }) => {
-              console.log(useLocation().pathname, link);
               return (
                 <Link
                   to={link}

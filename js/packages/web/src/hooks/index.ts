@@ -9,4 +9,3 @@ export * from './useCreators';
 export * from './useCreatorArts';
 export * from './useNotifications';
 export * from './useAuctionManagersToCache';
-export * from './useWindowWidth';

@@ -1,4 +1,4 @@
-import { Card, CardProps, Divider, Space } from 'antd';
+import { Card, CardProps, Space, Divider } from 'antd';
 import React from 'react';
 import { AuctionView, useArt } from '../../hooks';
 import { AmountLabel } from '../AmountLabel';
@@ -28,7 +28,7 @@ export const AuctionRenderCard = (props: AuctionCard) => {
           pubkey={id}
           allowMeshRender={false}
         />
-        <h3 style={{ marginTop: '0.5rem' }}>{name}</h3>
+        <h3 style={{ margin: '1rem 0 0.5rem' }}>{name}</h3>
 
         {!status.isInstantSale && status.isLive && (
           <div>

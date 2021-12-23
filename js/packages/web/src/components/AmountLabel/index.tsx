@@ -33,7 +33,6 @@ export const AmountLabel = (props: IAmountLabel) => {
 
   return (
     <>
-      <h5>{title}</h5>
       <Space direction="horizontal" align="baseline">
         {PriceNaN === false && (
           <Statistic
@@ -41,12 +40,14 @@ export const AmountLabel = (props: IAmountLabel) => {
             prefix={customPrefix || <SolCircle />}
           />
         )}
+        {displayUSD && <span style={{ opacity: '0.5' }}>|</span>}
         {displayUSD && (
           <div>
             {PriceNaN === false ? formatUSD.format(priceUSD || 0) : 'Place Bid'}
           </div>
         )}
       </Space>
+      <p className="auction-status">{title}</p>
     </>
   );
 };

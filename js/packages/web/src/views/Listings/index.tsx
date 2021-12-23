@@ -1,7 +1,7 @@
 import { useStore } from '@oyster/common';
 import React, { useEffect } from 'react';
 import { LoadingOutlined } from '@ant-design/icons';
-import { Alert, Button, Spin, Anchor, Menu } from 'antd';
+import { Alert, Button, Spin, Anchor } from 'antd';
 import { Link } from 'react-router-dom';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useAuctionManagersToCache } from '../../hooks';
@@ -10,7 +10,7 @@ import { AuctionRenderCard } from '../../components/AuctionRenderCard';
 import { MetaplexMasonry } from './../../components/MetaplexMasonry';
 import useInfiniteScroll from 'react-infinite-scroll-hook';
 import { useSearchParams } from 'react-router-dom';
-import { useInfiniteScrollAuctions, useWindowWidth } from '../../hooks';
+import { useInfiniteScrollAuctions } from '../../hooks';
 
 export const Listings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -39,6 +39,21 @@ export const Listings = () => {
       setSearchParams({ view: 'live' });
     }
   }, [view]);
+
+  const views = [
+    {
+      key: 'live',
+      title: 'Live',
+    },
+    {
+      key: 'resale',
+      title: 'Secondary',
+    },
+    {
+      key: 'ended',
+      title: 'Ended',
+    },
+  ];
 
   return (
     <>
@@ -77,20 +92,27 @@ export const Listings = () => {
         headingText={storefront.meta.title}
         subHeadingText={storefront.meta.description}
       />
-      <Anchor showInkInFixed={false}>
-        <Menu
-          className="metaplex-menu-pills"
-          onClick={(e: any) => {
-            setSearchParams({ view: e.key });
-          }}
-          selectedKeys={[view]}
-          mode={useWindowWidth() > 450 ? 'horizontal' : 'vertical'}
-          style={{ marginBottom: '1rem' }}
-        >
-          <Menu.Item key="live">Live</Menu.Item>
-          <Menu.Item key="resale">Secondary Listings</Menu.Item>
-          <Menu.Item key="ended">Ended</Menu.Item>
-        </Menu>
+      <Anchor
+        showInkInFixed={false}
+        style={{
+          padding: '1rem 0 0',
+          backgroundColor: 'var(--color-base',
+          marginBottom: '0.5rem',
+        }}
+      >
+        <ul className="nav-menu-wrapper">
+          {views.map(({ key, title }) => {
+            return (
+              <li
+                key={key}
+                className={'nav-menu-item' + (view === key ? ' active' : '')}
+                onClick={() => setSearchParams({ view: key })}
+              >
+                {title}
+              </li>
+            );
+          })}
+        </ul>
       </Anchor>
       {initLoading ? (
         <div className="app-section--loading">
