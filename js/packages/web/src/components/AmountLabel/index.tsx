@@ -1,5 +1,5 @@
 import { formatUSD } from '@oyster/common';
-import { Space, Statistic } from 'antd';
+import { Statistic } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useSolPrice } from '../../contexts';
 import { SolCircle } from '../Custom';
@@ -13,13 +13,7 @@ interface IAmountLabel {
 }
 
 export const AmountLabel = (props: IAmountLabel) => {
-  const {
-    amount,
-    displayUSD = true,
-    displaySOL = false,
-    title = '',
-    customPrefix,
-  } = props;
+  const { amount, displayUSD = true, title = '', customPrefix } = props;
 
   const solPrice = useSolPrice();
 
@@ -33,10 +27,11 @@ export const AmountLabel = (props: IAmountLabel) => {
 
   return (
     <>
-      <Space direction="horizontal" align="baseline">
+      <div className="amount-label-wrapper">
         {PriceNaN === false && (
           <Statistic
-            value={`${amount.toLocaleString()}${displaySOL ? ' SOL' : ''}`}
+            className="sol-price"
+            value={amount.toLocaleString()}
             prefix={customPrefix || <SolCircle />}
           />
         )}
@@ -46,7 +41,7 @@ export const AmountLabel = (props: IAmountLabel) => {
             {PriceNaN === false ? formatUSD.format(priceUSD || 0) : 'Place Bid'}
           </div>
         )}
-      </Space>
+      </div>
       <p className="auction-status">{title}</p>
     </>
   );
