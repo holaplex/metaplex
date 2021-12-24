@@ -95,12 +95,12 @@ export const Listings = () => {
       <Anchor
         showInkInFixed={false}
         style={{
-          padding: '1rem 0 1rem',
+          padding: '0.5rem 0 0.75rem',
           backgroundColor: 'var(--color-base',
-          margin: '0 0 1rem -2px',
+          margin: '0 0 0 -2px',
         }}
       >
-        <div className="nav-menu-wrapper">
+        <div className="nav-menu-wrapper secondary">
           {views.map(({ key, title }) => {
             return (
               <button

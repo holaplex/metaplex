@@ -2,7 +2,7 @@ import { ConnectButton, useStore } from '@oyster/common';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Row } from 'antd';
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useMatch, useLocation } from 'react-router-dom';
 import { Cog, CurrentUserBadge } from '../CurrentUserBadge';
 import { HowToBuyModal } from '../HowToBuyModal';
 import { Notifications } from '../Notifications';
@@ -59,14 +59,17 @@ export const AppBar = (props: P) => {
         </Link>
         <div className="nav-right">
           <div className="nav-menu-wrapper">
-            {menu.map(({ key, link, title }) => {
+            {menu.map(({ key, link, title, group }) => {
+              const match = useMatch(group + '/:item');
               return (
                 <Link
                   to={link}
                   key={key}
                   className={
                     'nav-menu-item' +
-                    (link.startsWith(useLocation().pathname) ? ' active' : '')
+                    (match || link.startsWith(useLocation().pathname)
+                      ? ' active'
+                      : '')
                   }
                 >
                   {title}

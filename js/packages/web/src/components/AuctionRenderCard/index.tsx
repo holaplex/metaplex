@@ -19,7 +19,7 @@ export const AuctionRenderCard = (props: AuctionCard) => {
   const humanStatus = getHumanStatus(status);
 
   const card = (
-    <Card hoverable bordered={false} style={{ borderRadius: '10px' }}>
+    <Card hoverable bordered={false} style={{ borderRadius: '8px' }}>
       <Space direction="vertical" className="metaplex-fullwidth">
         <ArtContent
           square
