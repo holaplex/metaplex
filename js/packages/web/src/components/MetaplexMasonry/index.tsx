@@ -5,7 +5,7 @@ const COL_BREAKPOINTS = {
   // [ <width> | 'default' ]: <num-cols>
   default: 4,
   1100: 3,
-  700: 2,
+  850: 2,
   500: 1,
 };
 

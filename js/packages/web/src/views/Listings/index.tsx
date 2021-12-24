@@ -95,24 +95,24 @@ export const Listings = () => {
       <Anchor
         showInkInFixed={false}
         style={{
-          padding: '1rem 0 0',
+          padding: '1rem 0 1rem',
           backgroundColor: 'var(--color-base',
           margin: '0 0 1rem -2px',
         }}
       >
-        <ul className="nav-menu-wrapper">
+        <div className="nav-menu-wrapper">
           {views.map(({ key, title }) => {
             return (
-              <li
+              <button
                 key={key}
                 className={'nav-menu-item' + (view === key ? ' active' : '')}
                 onClick={() => setSearchParams({ view: key })}
               >
                 {title}
-              </li>
+              </button>
             );
           })}
-        </ul>
+        </div>
       </Anchor>
       {initLoading ? (
         <div className="app-section--loading">
