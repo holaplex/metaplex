@@ -958,7 +958,7 @@ export const AuctionCard = ({
               type="primary"
               size="large"
               onClick={connect}
-              style={{ marginTop: '1rem', borderRadius: '8px' }}
+              style={{ marginTop: '1rem', borderRadius: '5px' }}
             >
               Connect wallet to{' '}
               {auctionView.isInstantSale ? 'purchase' : 'place bid'}

@@ -34,7 +34,6 @@ import {
   Carousel,
   Col,
   List,
-  Row,
   Skeleton,
   Space,
   Spin,
@@ -313,12 +312,14 @@ const BidLine = (props: {
   }, [bidderTwitterHandle]);
 
   return (
-    <Row
-      wrap={false}
-      align="middle"
-      className={cx('metaplex-fullwidth', 'auction-bid-line-item', {
-        'auction-bid-last-winner': isLastWinner,
-      })}
+    <div
+      className={cx(
+        'bid-line-wrapper metaplex-fullwidth',
+        'auction-bid-line-item',
+        {
+          'auction-bid-last-winner': isLastWinner,
+        },
+      )}
     >
       <Col span={9}>
         <Space
@@ -359,7 +360,7 @@ const BidLine = (props: {
           <ClickToCopy copyText={bidder} />
         </Space>
       </Col>
-    </Row>
+    </div>
   );
 };
 
