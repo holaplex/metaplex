@@ -852,34 +852,34 @@ export const AuctionCard = ({
             Submit Bid
           </Button>
         </Col>
-        <Col span={24}>
+        <div style={{ marginTop: '1rem' }}>
           {!loading && (
-            <Space direction="vertical" size="middle">
+            <>
               {notEnoughFundsToBid && (
-                <Text type="danger">
+                <Text className="danger" type="danger">
                   You do not have enough funds to fulfill the bid. Your current
                   bidding power is {biddingPower} SOL.
                 </Text>
               )}
-              {value && tickSizeInvalid && tickSize && (
-                <Text type="danger">
+              {!!value && tickSizeInvalid && tickSize && (
+                <Text className="danger" type="danger">
                   Tick size is ◎{tickSize.toNumber() / LAMPORTS_PER_SOL}.
                 </Text>
               )}
-              {value !== undefined && belowMinBid && (
-                <Text type="danger">
+              {value !== undefined && !!belowMinBid && (
+                <Text className="danger" type="danger">
                   The bid must be at least {minBid} SOL.
                 </Text>
               )}
               {gapBidInvalid && (
-                <Text type="danger">
+                <Text className="danger" type="danger">
                   Your bid needs to be at least {gapTick}% larger than an
                   existing bid during gap periods to be eligible.
                 </Text>
               )}
-            </Space>
+            </>
           )}
-        </Col>
+        </div>
       </Row>
     </Space>
   );
@@ -916,39 +916,32 @@ export const AuctionCard = ({
           direction="vertical"
         >
           <Row gutter={8} align="middle">
-            <Col span={12}>
-              <AuctionNumbers
-                auctionView={auctionView}
-                showAsRow={true}
-                hideCountdown={true}
+            <AuctionNumbers
+              auctionView={auctionView}
+              showAsRow={true}
+              hideCountdown={true}
+              displaySOL={true}
+            />
+
+            {showPlaceBidUI && !isAuctionOver(auctionView) ? (
+              <AmountLabel
+                title="in your wallet"
                 displaySOL={true}
+                amount={balance.balance}
+                customPrefix={
+                  <Identicon
+                    size={24}
+                    address={wallet?.publicKey?.toBase58()}
+                  />
+                }
               />
-            </Col>
-            {showPlaceBidUI ? (
-              <Col span={12}>
-                <AmountLabel
-                  title="in your wallet"
-                  displaySOL={true}
-                  amount={balance.balance}
-                  customPrefix={
-                    <Identicon
-                      size={24}
-                      address={wallet?.publicKey?.toBase58()}
-                    />
-                  }
-                />
-              </Col>
             ) : (
               <>
                 {!auctionView.isInstantSale && (
-                  <Col flex="1 0 auto">
-                    <HowAuctionsWorkModal buttonBlock buttonSize="large" />
-                  </Col>
+                  <HowAuctionsWorkModal buttonBlock buttonSize="large" />
                 )}
                 {showStartOrPlaceBidBtns && (
-                  <Col flex="0 0 auto">
-                    {showStartAuctionBtn ? startAuctionBtn : placeBidBtn}
-                  </Col>
+                  <>{showStartAuctionBtn ? startAuctionBtn : placeBidBtn}</>
                 )}
               </>
             )}
