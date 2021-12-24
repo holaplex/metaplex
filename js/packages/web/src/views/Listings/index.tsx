@@ -97,7 +97,7 @@ export const Listings = () => {
         style={{
           padding: '1rem 0 0',
           backgroundColor: 'var(--color-base',
-          marginBottom: '0.5rem',
+          margin: '0 0 1rem -2px',
         }}
       >
         <ul className="nav-menu-wrapper">

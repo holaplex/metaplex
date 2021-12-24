@@ -26,7 +26,7 @@ export const AmountLabel = (props: IAmountLabel) => {
   const PriceNaN = isNaN(amount);
 
   return (
-    <>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
       <div className="amount-label-wrapper">
         {PriceNaN === false && (
           <Statistic
@@ -43,6 +43,6 @@ export const AmountLabel = (props: IAmountLabel) => {
         )}
       </div>
       <p className="auction-status">{title}</p>
-    </>
+    </div>
   );
 };

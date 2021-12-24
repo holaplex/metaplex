@@ -8,7 +8,6 @@ import {
   formatTokenAmount,
   fromLamports,
   getAuctionExtended,
-  Identicon,
   loadMultipleAccounts,
   MAX_EDITION_LEN,
   MAX_METADATA_LEN,
@@ -894,58 +893,56 @@ export const AuctionCard = ({
     <div>
       <Card
         bordered={false}
-        className="metaplex-spacing-bottom-md"
+        className="metaplex-spacing-bottom-md auction-card"
         title={
           auctionView.isInstantSale ? undefined : isAuctionOver(auctionView) ? (
             'Auction has ended'
           ) : (
             <Space direction="horizontal">
-              <span>Auction ends in</span>
+              <span>Ends in</span>
               <AuctionCountdown auctionView={auctionView} labels={false} />
             </Space>
           )
         }
-        style={{
-          borderRadius: '1rem',
-          backgroundColor: '#7773',
-          padding: '0.5rem',
-        }}
       >
         <Space
           className="metaplex-fullwidth metaplex-space-align-stretch"
           direction="vertical"
         >
-          <Row gutter={8} align="middle">
-            <AuctionNumbers
-              auctionView={auctionView}
-              showAsRow={true}
-              hideCountdown={true}
-              displaySOL={true}
-            />
-
-            {showPlaceBidUI && !isAuctionOver(auctionView) ? (
-              <AmountLabel
-                title="in your wallet"
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '1rem',
+              }}
+            >
+              <AuctionNumbers
+                auctionView={auctionView}
+                showAsRow={true}
+                hideCountdown={true}
                 displaySOL={true}
-                amount={balance.balance}
-                customPrefix={
-                  <Identicon
-                    size={24}
-                    address={wallet?.publicKey?.toBase58()}
-                  />
-                }
               />
-            ) : (
-              <>
+              {showPlaceBidUI && !isAuctionOver(auctionView) && (
+                <AmountLabel
+                  title="in your wallet"
+                  displaySOL={true}
+                  amount={balance.balance}
+                />
+              )}
+            </div>
+            {!showPlaceBidUI && (
+              <div className="auction-buttons-wrapper">
                 {!auctionView.isInstantSale && (
                   <HowAuctionsWorkModal buttonBlock buttonSize="large" />
                 )}
                 {showStartOrPlaceBidBtns && (
                   <>{showStartAuctionBtn ? startAuctionBtn : placeBidBtn}</>
                 )}
-              </>
+              </div>
             )}
-          </Row>
+          </div>
 
           {showDefaultNonEndedAction &&
             showPlaceBidUI &&
@@ -961,7 +958,7 @@ export const AuctionCard = ({
               type="primary"
               size="large"
               onClick={connect}
-              style={{ marginTop: '1rem', borderRadius: '8px' }}
+              style={{ marginTop: '1rem', borderRadius: '10px' }}
             >
               Connect wallet to{' '}
               {auctionView.isInstantSale ? 'purchase' : 'place bid'}

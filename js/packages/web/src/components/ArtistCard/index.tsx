@@ -27,7 +27,7 @@ export const ArtistCard = ({
         </div>
       }
       bordered={false}
-      style={{ borderRadius: '8px' }}
+      style={{ borderRadius: '10px' }}
     >
       <div className="content-wrapper">
         <MetaAvatar creators={[artist]} size={40} />

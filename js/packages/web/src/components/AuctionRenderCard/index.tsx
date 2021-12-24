@@ -19,7 +19,7 @@ export const AuctionRenderCard = (props: AuctionCard) => {
   const humanStatus = getHumanStatus(status);
 
   const card = (
-    <Card hoverable bordered={false} style={{ borderRadius: '8px' }}>
+    <Card hoverable bordered={false} style={{ borderRadius: '10px' }}>
       <Space direction="vertical" className="metaplex-fullwidth">
         <ArtContent
           square
@@ -32,7 +32,9 @@ export const AuctionRenderCard = (props: AuctionCard) => {
 
         {!status.isInstantSale && status.isLive && (
           <div>
-            <h5>ENDING IN</h5>
+            <p style={{ fontSize: '0.9rem', margin: '0.5rem 0 0.35rem' }}>
+              Ending in
+            </p>
             <AuctionCountdown auctionView={auctionView} labels={false} />
           </div>
         )}

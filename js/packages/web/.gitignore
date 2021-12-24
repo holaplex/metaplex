@@ -1,4 +1,3 @@
 target
 .next
 .env.local
-dump.rdb
