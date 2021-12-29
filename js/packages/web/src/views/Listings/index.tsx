@@ -52,14 +52,17 @@ export const Listings = () => {
     {
       key: 'live',
       title: 'Live',
+      count: () => showCount(View.live),
     },
     {
       key: 'resale',
       title: 'Secondary',
+      count: () => showCount(View.resale),
     },
     {
       key: 'ended',
       title: 'Ended',
+      count: () => showCount(View.ended),
     },
   ];
 
@@ -109,14 +112,14 @@ export const Listings = () => {
         }}
       >
         <div className="nav-menu-wrapper secondary">
-          {views.map(({ key, title }) => {
+          {views.map(({ key, title, count }) => {
             return (
               <button
                 key={key}
                 className={'nav-menu-item' + (view === key ? ' active' : '')}
                 onClick={() => setSearchParams({ view: key })}
               >
-                {title}
+                {title} <span className="auctions-count">| {count()}</span>
               </button>
             );
           })}
