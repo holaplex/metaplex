@@ -1,4 +1,4 @@
-import { useStore } from '@oyster/common';
+import { useStore, View } from '@oyster/common';
 import React, { useEffect } from 'react';
 import { LoadingOutlined } from '@ant-design/icons';
 import { Alert, Button, Spin, Anchor } from 'antd';
@@ -15,7 +15,7 @@ import { useInfiniteScrollAuctions } from '../../hooks';
 export const Listings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const view = searchParams.get('view') as string;
+  const view = searchParams.get('view') as View;
   const { ownerAddress, storefront } = useStore();
   const wallet = useWallet();
   const { auctionManagerTotal, auctionCacheTotal } =
@@ -24,8 +24,14 @@ export const Listings = () => {
   const notAllAuctionsCached = auctionManagerTotal !== auctionCacheTotal;
   const showCacheAuctionsAlert = isStoreOwner && notAllAuctionsCached;
 
-  const { auctions, loading, hasNextPage, initLoading, loadMore } =
-    useInfiniteScrollAuctions(view);
+  const {
+    auctions,
+    loading,
+    hasNextPage,
+    initLoading,
+    loadMore,
+    auctionsCount,
+  } = useInfiniteScrollAuctions(view);
 
   const [sentryRef] = useInfiniteScroll({
     loading,
@@ -34,9 +40,11 @@ export const Listings = () => {
     rootMargin: '0px 0px 200px 0px',
   });
 
+  const showCount = (view: View) =>
+    auctionsCount[view] != null ? auctionsCount[view] : <Spin size="small" />;
   useEffect(() => {
     if (!view) {
-      setSearchParams({ view: 'live' });
+      setSearchParams({ view: View.live });
     }
   }, [view]);
 
