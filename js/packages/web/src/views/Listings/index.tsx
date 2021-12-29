@@ -52,17 +52,17 @@ export const Listings = () => {
     {
       key: 'live',
       title: 'Live',
-      count: () => showCount(View.live),
+      count: () => showCount(View.live) || 0,
     },
     {
       key: 'resale',
       title: 'Secondary',
-      count: () => showCount(View.resale),
+      count: () => showCount(View.resale) || 0,
     },
     {
       key: 'ended',
       title: 'Ended',
-      count: () => showCount(View.ended),
+      count: () => showCount(View.ended) || 0,
     },
   ];
 
@@ -112,17 +112,19 @@ export const Listings = () => {
         }}
       >
         <div className="nav-menu-wrapper secondary">
-          {views.map(({ key, title, count }) => {
-            return (
-              <button
-                key={key}
-                className={'nav-menu-item' + (view === key ? ' active' : '')}
-                onClick={() => setSearchParams({ view: key })}
-              >
-                {title} <span className="auctions-count">| {count()}</span>
-              </button>
-            );
-          })}
+          {views
+            .filter(({ count }) => count() > 0)
+            .map(({ key, title, count }) => {
+              return (
+                <button
+                  key={key}
+                  className={'nav-menu-item' + (view === key ? ' active' : '')}
+                  onClick={() => setSearchParams({ view: key })}
+                >
+                  {title} <span className="auctions-count">| {count()}</span>
+                </button>
+              );
+            })}
         </div>
       </Anchor>
       {initLoading ? (
