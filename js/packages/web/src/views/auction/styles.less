@@ -1,8 +1,20 @@
 .item-page-wrapper {
   display: flex;
-  gap: 6rem;
+  gap: 5rem;
   max-width: 1400px;
   margin: 0 auto;
+
+  @media screen and (max-width: 1400px) {
+    gap: 4rem;
+  }
+
+  @media screen and (max-width: 1200px) {
+    gap: 3rem;
+  }
+
+  @media screen and (max-width: 1000px) {
+    gap: 2rem;
+  }
 
   @media screen and (max-width: 760px) {
     flex-direction: column;
@@ -47,6 +59,7 @@
     }
   }
   &-last-winner {
+    padding-bottom: 0.5rem;
     border-bottom: 1px solid @theme-color-base-bold;
   }
 }
@@ -96,4 +109,11 @@
 .bid-line-wrapper {
   display: flex;
   flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.info-header {
+  margin: 0.75rem 0;
 }

@@ -32,12 +32,9 @@ import { Connection } from '@solana/web3.js';
 import {
   Button,
   Carousel,
-  Col,
   List,
   Skeleton,
-  Space,
   Spin,
-  Typography,
   Tooltip,
   notification,
 } from 'antd';
@@ -61,8 +58,6 @@ import {
 } from '../../hooks';
 import { ArtType } from '../../types';
 import useWindowDimensions from '../../utils/layout';
-
-const { Text } = Typography;
 
 export const AuctionItem = ({
   item,
@@ -177,11 +172,16 @@ export const AuctionView = () => {
 
   const getDescriptionAndAttributes = (className: string) => (
     <div className={className}>
-      <p style={{ padding: '0 8px' }}>{description}</p>
+      {description && (
+        <>
+          <h3 className="info-header">Description</h3>
+          <p>{description}</p>
+        </>
+      )}
 
       {attributes && (
         <div>
-          <Text>Attributes</Text>
+          <h3 className="info-header">Attributes</h3>
           <List grid={{ column: 4 }}>
             {attributes.map((attribute, index) => (
               <List.Item key={`${attribute.value}-${index}`}>
@@ -266,10 +266,12 @@ export const AuctionView = () => {
           </div>
         </div>
 
-        {!auction && <Skeleton paragraph={{ rows: 6 }} />}
-        {auction && (
-          <AuctionCard auctionView={auction} hideDefaultAction={false} />
-        )}
+        <div style={{ marginBottom: '1.75rem' }}>
+          {!auction && <Skeleton paragraph={{ rows: 6 }} />}
+          {auction && (
+            <AuctionCard auctionView={auction} hideDefaultAction={false} />
+          )}
+        </div>
         {!auction?.isInstantSale && <AuctionBids auctionView={auction} />}
       </div>
     </div>
@@ -321,45 +323,38 @@ const BidLine = (props: {
         },
       )}
     >
-      <Col span={9}>
-        <Space
-          direction="horizontal"
-          className={cx({
-            'auction-bid-line-item-is-canceled':
-              isCancelled && publicKey?.toBase58() === bidder,
-          })}
-        >
-          {isme && <CheckOutlined />}
-          <AmountLabel
-            displaySOL={true}
-            amount={fromLamports(bid.info.lastBid, mint)}
-          />
-        </Space>
-      </Col>
-      <Col span={6}>
+      <div
+        className={cx({
+          'auction-bid-line-item-is-canceled':
+            isCancelled && publicKey?.toBase58() === bidder,
+        })}
+      >
+        {isme && <CheckOutlined />}
+        <AmountLabel
+          displaySOL={true}
+          amount={fromLamports(bid.info.lastBid, mint)}
+        />
+      </div>
+
+      <div>
         {/* uses milliseconds */}
         {format(bid.info.lastBidTimestamp.toNumber() * 1000)}
-      </Col>
-      <Col span={9}>
-        <Space
-          direction="horizontal"
-          align="center"
-          className="metaplex-fullwidth metaplex-space-justify-end"
-        >
-          <Identicon size={24} address={bidder} />
-          {bidderTwitterHandle ? (
-            <a
-              target="_blank"
-              rel="noopener noreferrer"
-              title={shortenAddress(bidder)}
-              href={`https://twitter.com/${bidderTwitterHandle}`}
-            >{`@${bidderTwitterHandle}`}</a>
-          ) : (
-            shortenAddress(bidder)
-          )}
-          <ClickToCopy copyText={bidder} />
-        </Space>
-      </Col>
+      </div>
+
+      <div style={{ display: 'flex', gap: '1rem' }}>
+        <Identicon size={24} address={bidder} />
+        {bidderTwitterHandle ? (
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            title={shortenAddress(bidder)}
+            href={`https://twitter.com/${bidderTwitterHandle}`}
+          >{`@${bidderTwitterHandle}`}</a>
+        ) : (
+          shortenAddress(bidder)
+        )}
+        <ClickToCopy copyText={bidder} />
+      </div>
     </div>
   );
 };
@@ -425,9 +420,9 @@ export const AuctionBids = ({
   if (!auctionView || bids.length < 1) return null;
 
   return (
-    <Space direction="vertical" className="metaplex-fullwidth">
-      <Space direction="horizontal" size="middle">
-        <Text>Bid History</Text>
+    <div>
+      <div>
+        <p style={{ marginBottom: '1rem' }}>Bid History</p>
         {auctionRunning &&
           auctionView.myBidderMetadata &&
           !auctionView.myBidderMetadata.info.cancelled && (
@@ -478,7 +473,7 @@ export const AuctionBids = ({
               </Button>
             </Tooltip>
           )}
-      </Space>
+      </div>
       <div>{bidLines.slice(0, 10)}</div>
       {bids.length > 10 && (
         <Button onClick={() => setShowHistoryModal(true)}>
@@ -494,6 +489,6 @@ export const AuctionBids = ({
       >
         {bidLines}
       </MetaplexModal>
-    </Space>
+    </div>
   );
 };
