@@ -1,7 +1,7 @@
 import { useStore, View } from '@oyster/common';
 import React, { useEffect } from 'react';
 import { LoadingOutlined } from '@ant-design/icons';
-import { Alert, Button, Spin, Anchor, Menu } from 'antd';
+import { Alert, Button, Spin, Anchor } from 'antd';
 import { Link } from 'react-router-dom';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useAuctionManagersToCache } from '../../hooks';
@@ -48,6 +48,21 @@ export const Listings = () => {
     }
   }, [view]);
 
+  const views = [
+    {
+      key: 'live',
+      title: 'Live',
+    },
+    {
+      key: 'resale',
+      title: 'Secondary',
+    },
+    {
+      key: 'ended',
+      title: 'Ended',
+    },
+  ];
+
   return (
     <>
       {showCacheAuctionsAlert && (
@@ -85,25 +100,27 @@ export const Listings = () => {
         headingText={storefront.meta.title}
         subHeadingText={storefront.meta.description}
       />
-      <Anchor showInkInFixed={false}>
-        <Menu
-          className="metaplex-menu-pills"
-          onClick={(e: any) => {
-            setSearchParams({ view: e.key });
-          }}
-          selectedKeys={[view]}
-          mode="horizontal"
-        >
-          <Menu.Item key={View.live}>
-            Live <span className="auctions-count"> | {showCount(View.live)}</span>
-          </Menu.Item>
-          <Menu.Item key={View.resale}>
-            Secondary Listings <span className="auctions-count"> | {showCount(View.resale)}</span>
-          </Menu.Item>
-          <Menu.Item key={View.ended}>
-            Ended <span className="auctions-count"> | {showCount(View.ended)}</span>
-          </Menu.Item>
-        </Menu>
+      <Anchor
+        showInkInFixed={false}
+        style={{
+          padding: '0.5rem 0 0.75rem',
+          backgroundColor: 'var(--color-base',
+          margin: '0 0 0 -2px',
+        }}
+      >
+        <div className="nav-menu-wrapper secondary">
+          {views.map(({ key, title }) => {
+            return (
+              <button
+                key={key}
+                className={'nav-menu-item' + (view === key ? ' active' : '')}
+                onClick={() => setSearchParams({ view: key })}
+              >
+                {title}
+              </button>
+            );
+          })}
+        </div>
       </Anchor>
       {initLoading ? (
         <div className="app-section--loading">

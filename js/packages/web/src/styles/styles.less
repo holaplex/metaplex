@@ -1,4 +1,8 @@
-// Overrides and antd cleanup
+// Google font testing
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;600&display=swap');
+* {
+  font-family: 'Inter', sans-serif !important;
+}
 
 .ant-alert-message {
   color: @theme-color-text;
@@ -17,7 +21,6 @@
 }
 
 // Global utility classes
-
 .metaplex {
   &-spacing {
     &-bottom {
@@ -112,4 +115,16 @@ h4,
 h5,
 h6 {
   font-family: @theme-family-title;
+  margin: 0;
+  line-height: 1;
+  font-weight: bold;
+}
+
+@media screen and (max-width: 900px) {
+  .ant-menu-horizontal {
+    line-height: 1 !important;
+    > .ant-menu-item {
+      padding: 10px 14px !important;
+    }
+  }
 }
