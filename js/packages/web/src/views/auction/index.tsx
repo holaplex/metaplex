@@ -23,6 +23,7 @@ import {
   VAULT_ID,
   processVaultData,
   fromLamports,
+  getTwitterHandle,
 } from '@oyster/common';
 import { actions } from '@metaplex/js';
 import { PublicKey } from '@solana/web3.js';
@@ -298,22 +299,14 @@ const BidLine = (props: {
   const connection = useConnection();
   const [bidderTwitterHandle, setBidderTwitterHandle] = useState('');
   useEffect(() => {
-    const getTwitterHandle = async (
-      connection: Connection,
-      bidder: StringPublicKey,
-    ): Promise<string | undefined> => {
-      try {
-        const [twitterHandle] = await getHandleAndRegistryKey(
-          connection,
-          toPublicKey(bidder),
-        );
-        setBidderTwitterHandle(twitterHandle);
-      } catch (err) {
-        console.warn(`err`);
-        return undefined;
+    const getTwHandle = async () => {
+      const twitterHandle = await getTwitterHandle(connection, bidder );
+      if(twitterHandle) {
+
+        setBidderTwitterHandle(twitterHandle)
       }
-    };
-    getTwitterHandle(connection, bidder);
+    }
+    getTwHandle();
   }, [bidderTwitterHandle]);
 
   return (
