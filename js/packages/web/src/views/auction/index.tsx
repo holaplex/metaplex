@@ -30,6 +30,7 @@ import { PublicKey } from '@solana/web3.js';
 import cx from 'classnames';
 import { AuctionViewItem } from '@oyster/common/dist/lib/models/metaplex/index';
 import { getHandleAndRegistryKey } from '@solana/spl-name-service';
+import { performReverseLookup } from '@bonfida/spl-name-service';
 import { MintInfo } from '@solana/spl-token';
 import { Link } from 'react-router-dom';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -107,7 +108,7 @@ export const AuctionView = () => {
   const creators = useCreators(auction);
   const wallet = useWallet();
   let edition = '';
-  console.log(art);
+
   if (art.type === ArtType.NFT) {
     edition = 'Unique';
   } else if (art.type === ArtType.Master) {
@@ -123,6 +124,7 @@ export const AuctionView = () => {
   const attributes = data?.attributes;
 
   useEffect(() => {
+    console.log('art', art);
     return subscribeProgramChanges(
       connection,
       patchState,
@@ -255,7 +257,9 @@ export const AuctionView = () => {
                     <Skeleton paragraph={{ rows: 0 }} />
                   ) : (
                     <span>
-                      {`${(art.maxSupply || 0) - (art.supply || 0)} of ${art.maxSupply || 0} `}
+                      {`${(art.maxSupply || 0) - (art.supply || 0)} of ${
+                        art.maxSupply || 0
+                      } `}
                       <Tooltip title="Max supply may include items from previous listings">
                         <InfoCircleFilled size={12} />
                       </Tooltip>
@@ -292,20 +296,117 @@ const BidLine = (props: {
 }) => {
   const { bid, mint, isCancelled, isLastWinner } = props;
   const { publicKey } = useWallet();
-  const bidder = bid.info.bidderPubkey;
-  const isme = publicKey?.toBase58() === bidder;
+  const bidderPubkey = bid.info.bidderPubkey;
+  const isMe = publicKey?.toBase58() === bidderPubkey;
 
   // Get Twitter Handle from address
   const connection = useConnection();
   const [bidderTwitterHandle, setBidderTwitterHandle] = useState('');
   useEffect(() => {
-    const getTwHandle = async () => {
-      const twitterHandle = await getTwitterHandle(connection, bidder );
-      if(twitterHandle) {
-
-        setBidderTwitterHandle(twitterHandle)
-      }
+    const NAME_PROGRAM_ID = new PublicKey(
+      'namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX',
+    );
+    async function findOwnedNameAccountsForUser(
+      connection: Connection,
+      userAccount: PublicKey,
+    ): Promise<PublicKey[]> {
+      const filters = [
+        {
+          memcmp: {
+            offset: 32,
+            bytes: userAccount.toBase58(),
+          },
+        },
+      ];
+      const accounts = await connection.getProgramAccounts(NAME_PROGRAM_ID, {
+        filters,
+      });
+      return accounts.map(a => a.pubkey);
     }
+
+    const getTwHandle = async () => {
+      const twitterHandle = await getTwitterHandle(connection, bidderPubkey);
+      // Public key of bonfida.sol
+      try {
+        const bonfidaDomainPublicKey = new PublicKey(
+          'Crf8hzfthWGbGbLTVCiqRqV5MVnbpHB1L9KQMd6gsinb',
+        );
+        const belleDomainPublicKey = new PublicKey(
+          '6URbM1jPUS3PSV3DSc69keVBUW5ZFmqjSUzxAUTUUj4n',
+        );
+        const bonfidaDomain = await performReverseLookup(
+          connection,
+          bonfidaDomainPublicKey,
+        ); // bonfida
+        console.log('bonfidaDomain', bonfidaDomain);
+
+        const belleDomain = await performReverseLookup(
+          connection,
+          belleDomainPublicKey,
+        ); // belle
+        console.log('belleDomain', belleDomain);
+      } catch (error) {
+        console.warn(error);
+      }
+
+      if (twitterHandle) {
+        setBidderTwitterHandle(twitterHandle);
+      } else {
+        return;
+        console.log('trying to fetch sol domain');
+        try {
+          const solDomain = await performReverseLookup(
+            connection,
+            new PublicKey(bidderPubkey),
+          );
+          console.log('solDomain', solDomain);
+          if (solDomain) {
+            setBidderTwitterHandle(solDomain + '.sol');
+          }
+        } catch (error) {
+          console.error(error);
+          try {
+            const bellePubKey = '2fLigDC5sgXmcVMzQUz3vBqoHSj2yCbAJW1oYX8qbyoR';
+            const bellePublicKey = new PublicKey(bellePubKey);
+            const allDomains = await findOwnedNameAccountsForUser(
+              connection,
+              bellePublicKey,
+            );
+            console.log('trying to fetch belle domain', {
+              bellePublicKey,
+              bellePubKey,
+              allDomains,
+              allDomains2: allDomains.map(pk => ({
+                base58: pk.toBase58(),
+              })),
+            });
+            const sDm = await performReverseLookup(
+              connection,
+              new PublicKey('6URbM1jPUS3PSV3DSc69keVBUW5ZFmqjSUzxAUTUUj4n'),
+            );
+            console.log('sDm', sDm);
+            // try {
+            //   for (const domainPk in allDomains) {
+            //     // @ts-ignore
+            //     const sDm = await performReverseLookup(connection, domainPk);
+            //     console.log(sDm);
+            //   }
+            // } catch (error) {
+            //   console.error(error);
+            // }
+            const belleDomain = await performReverseLookup(
+              connection,
+              bellePublicKey,
+            );
+            if (belleDomain) {
+              setBidderTwitterHandle(belleDomain + '.sol');
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }
+      }
+    };
     getTwHandle();
   }, [bidderTwitterHandle]);
 
@@ -320,16 +421,17 @@ const BidLine = (props: {
       <Col span={9}>
         <Space
           direction="horizontal"
+          align="baseline"
           className={cx({
             'auction-bid-line-item-is-canceled':
-              isCancelled && publicKey?.toBase58() === bidder,
+              isCancelled && publicKey?.toBase58() === bidderPubkey,
           })}
         >
-          {isme && <CheckOutlined />}
           <AmountLabel
             displaySOL={true}
             amount={fromLamports(bid.info.lastBid, mint)}
           />
+          {isMe && <CheckOutlined />}
         </Space>
       </Col>
       <Col span={6}>
@@ -342,18 +444,18 @@ const BidLine = (props: {
           align="center"
           className="metaplex-fullwidth metaplex-space-justify-end"
         >
-          <Identicon size={24} address={bidder} />
+          <Identicon size={24} address={bidderPubkey} />
           {bidderTwitterHandle ? (
             <a
               target="_blank"
               rel="noopener noreferrer"
-              title={shortenAddress(bidder)}
+              title={shortenAddress(bidderPubkey)}
               href={`https://twitter.com/${bidderTwitterHandle}`}
             >{`@${bidderTwitterHandle}`}</a>
           ) : (
-            shortenAddress(bidder)
+            shortenAddress(bidderPubkey)
           )}
-          <ClickToCopy copyText={bidder} />
+          <ClickToCopy copyText={bidderPubkey} />
         </Space>
       </Col>
     </Row>
@@ -391,8 +493,11 @@ export const AuctionBids = ({
   const activeBidders = useMemo(() => {
     return new Set(activeBids.map(b => b.key));
   }, [activeBids]);
+
+  // I could be wrong, but it looks like this memo updates on each countdown tick. Maybe because of auctionState?
   const bidLines = useMemo(() => {
     let activeBidIndex = 0;
+    // console.log('bidline memo', bids);
     return bids.map((bid, index) => {
       const isCancelled =
         (index < winnersCount && !!bid.info.cancelled) ||
@@ -402,7 +507,7 @@ export const AuctionBids = ({
         <BidLine
           bid={bid}
           index={activeBidIndex}
-          key={index}
+          key={bid.pubkey}
           mint={mint}
           isLastWinner={index + 1 === winners.length}
           isCancelled={isCancelled}
@@ -417,6 +522,13 @@ export const AuctionBids = ({
       return line;
     });
   }, [auctionState, bids, activeBidders]);
+
+  // useEffect(() => {
+  //   console.log('Auction bids change', {
+  //     bids,
+  //     bidLines,
+  //   });
+  // }, [bids]);
 
   if (!auctionView || bids.length < 1) return null;
 
