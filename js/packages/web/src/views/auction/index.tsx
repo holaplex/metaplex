@@ -10,8 +10,6 @@ import {
   MetaplexModal,
   ParsedAccount,
   shortenAddress,
-  StringPublicKey,
-  toPublicKey,
   useConnection,
   useMint,
   useMeta,
@@ -30,12 +28,9 @@ import { actions } from '@metaplex/js';
 import { PublicKey } from '@solana/web3.js';
 import cx from 'classnames';
 import { AuctionViewItem } from '@oyster/common/dist/lib/models/metaplex/index';
-import { getHandleAndRegistryKey } from '@solana/spl-name-service';
-import { performReverseLookup } from '@bonfida/spl-name-service';
 import { MintInfo } from '@solana/spl-token';
 import { Link } from 'react-router-dom';
 import { useWallet } from '@solana/wallet-adapter-react';
-import { Connection } from '@solana/web3.js';
 import {
   Button,
   Carousel,
@@ -317,17 +312,14 @@ const BidLine = (props: {
       if (twitterHandle) {
         setBidderHandle({ handle: twitterHandle, type: 'twitter' });
       } else {
-        const solDomain = await getSolDomain(
-          connection,
-          '2fLigDC5sgXmcVMzQUz3vBqoHSj2yCbAJW1oYX8qbyoR',
-        ); // bidderPubkey);
+        const solDomain = await getSolDomain(connection, bidderPubkey);
         if (solDomain) {
           setBidderHandle({ handle: solDomain + '.sol', type: '.sol' });
         }
       }
     };
     getBidderHandle();
-  }, [bidderHandle.handle]);
+  }, []);
 
   return (
     <Row

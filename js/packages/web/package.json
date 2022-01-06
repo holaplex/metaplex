@@ -14,7 +14,6 @@
     "@metaplex/js": "^4.9.0",
     "@oyster/common": "0.0.2",
     "@project-serum/serum": "^0.13.52",
-    "@solana/spl-name-service": "^0.1.3",
     "@solana/spl-token": "0.1.6",
     "@solana/spl-token-registry": "^0.2.202",
     "@solana/wallet-adapter-base": "^0.4.1",
