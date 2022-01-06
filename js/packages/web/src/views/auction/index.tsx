@@ -24,6 +24,7 @@ import {
   processVaultData,
   fromLamports,
   getTwitterHandle,
+  getSolDomain,
 } from '@oyster/common';
 import { actions } from '@metaplex/js';
 import { PublicKey } from '@solana/web3.js';
@@ -301,114 +302,32 @@ const BidLine = (props: {
 
   // Get Twitter Handle from address
   const connection = useConnection();
-  const [bidderTwitterHandle, setBidderTwitterHandle] = useState('');
+  const [bidderHandle, setBidderHandle] = useState<{
+    handle: string;
+    type: 'pubkey' | 'twitter' | '.sol';
+  }>({
+    handle: shortenAddress(bidderPubkey),
+    type: 'pubkey',
+  });
+
   useEffect(() => {
-    const NAME_PROGRAM_ID = new PublicKey(
-      'namesLPneVptA9Z5rqUDD9tMTWEJwofgaYwp8cawRkX',
-    );
-    async function findOwnedNameAccountsForUser(
-      connection: Connection,
-      userAccount: PublicKey,
-    ): Promise<PublicKey[]> {
-      const filters = [
-        {
-          memcmp: {
-            offset: 32,
-            bytes: userAccount.toBase58(),
-          },
-        },
-      ];
-      const accounts = await connection.getProgramAccounts(NAME_PROGRAM_ID, {
-        filters,
-      });
-      return accounts.map(a => a.pubkey);
-    }
-
-    const getTwHandle = async () => {
+    const getBidderHandle = async () => {
       const twitterHandle = await getTwitterHandle(connection, bidderPubkey);
-      // Public key of bonfida.sol
-      try {
-        const bonfidaDomainPublicKey = new PublicKey(
-          'Crf8hzfthWGbGbLTVCiqRqV5MVnbpHB1L9KQMd6gsinb',
-        );
-        const belleDomainPublicKey = new PublicKey(
-          '6URbM1jPUS3PSV3DSc69keVBUW5ZFmqjSUzxAUTUUj4n',
-        );
-        const bonfidaDomain = await performReverseLookup(
-          connection,
-          bonfidaDomainPublicKey,
-        ); // bonfida
-        console.log('bonfidaDomain', bonfidaDomain);
-
-        const belleDomain = await performReverseLookup(
-          connection,
-          belleDomainPublicKey,
-        ); // belle
-        console.log('belleDomain', belleDomain);
-      } catch (error) {
-        console.warn(error);
-      }
 
       if (twitterHandle) {
-        setBidderTwitterHandle(twitterHandle);
+        setBidderHandle({ handle: twitterHandle, type: 'twitter' });
       } else {
-        return;
-        console.log('trying to fetch sol domain');
-        try {
-          const solDomain = await performReverseLookup(
-            connection,
-            new PublicKey(bidderPubkey),
-          );
-          console.log('solDomain', solDomain);
-          if (solDomain) {
-            setBidderTwitterHandle(solDomain + '.sol');
-          }
-        } catch (error) {
-          console.error(error);
-          try {
-            const bellePubKey = '2fLigDC5sgXmcVMzQUz3vBqoHSj2yCbAJW1oYX8qbyoR';
-            const bellePublicKey = new PublicKey(bellePubKey);
-            const allDomains = await findOwnedNameAccountsForUser(
-              connection,
-              bellePublicKey,
-            );
-            console.log('trying to fetch belle domain', {
-              bellePublicKey,
-              bellePubKey,
-              allDomains,
-              allDomains2: allDomains.map(pk => ({
-                base58: pk.toBase58(),
-              })),
-            });
-            const sDm = await performReverseLookup(
-              connection,
-              new PublicKey('6URbM1jPUS3PSV3DSc69keVBUW5ZFmqjSUzxAUTUUj4n'),
-            );
-            console.log('sDm', sDm);
-            // try {
-            //   for (const domainPk in allDomains) {
-            //     // @ts-ignore
-            //     const sDm = await performReverseLookup(connection, domainPk);
-            //     console.log(sDm);
-            //   }
-            // } catch (error) {
-            //   console.error(error);
-            // }
-            const belleDomain = await performReverseLookup(
-              connection,
-              bellePublicKey,
-            );
-            if (belleDomain) {
-              setBidderTwitterHandle(belleDomain + '.sol');
-            }
-          } catch (e) {
-            console.error(e);
-          }
+        const solDomain = await getSolDomain(
+          connection,
+          '2fLigDC5sgXmcVMzQUz3vBqoHSj2yCbAJW1oYX8qbyoR',
+        ); // bidderPubkey);
+        if (solDomain) {
+          setBidderHandle({ handle: solDomain + '.sol', type: '.sol' });
         }
       }
     };
-    getTwHandle();
-  }, [bidderTwitterHandle]);
+    getBidderHandle();
+  }, [bidderHandle.handle]);
 
   return (
     <Row
@@ -445,15 +364,22 @@ const BidLine = (props: {
           className="metaplex-fullwidth metaplex-space-justify-end"
         >
           <Identicon size={24} address={bidderPubkey} />
-          {bidderTwitterHandle ? (
+          {bidderHandle.type === 'twitter' ? (
             <a
               target="_blank"
               rel="noopener noreferrer"
               title={shortenAddress(bidderPubkey)}
-              href={`https://twitter.com/${bidderTwitterHandle}`}
-            >{`@${bidderTwitterHandle}`}</a>
+              href={`https://twitter.com/${bidderHandle.handle}`}
+            >{`@${bidderHandle.handle}`}</a>
+          ) : bidderHandle.type === '.sol' ? (
+            <a
+              target="_blank"
+              rel="noopener noreferrer"
+              title={shortenAddress(bidderPubkey)}
+              href={`https://naming.bonfida.org/#/domain/${bidderHandle.handle}`}
+            >{`${bidderHandle.handle}.sol`}</a>
           ) : (
-            shortenAddress(bidderPubkey)
+            bidderHandle.handle
           )}
           <ClickToCopy copyText={bidderPubkey} />
         </Space>
