@@ -19,12 +19,13 @@ import {
   VAULT_ID,
   processVaultData,
   fromLamports,
+  getTwitterHandle,
+  getSolDomain,
 } from '@oyster/common';
 import { actions } from '@metaplex/js';
 import { PublicKey } from '@solana/web3.js';
 import cx from 'classnames';
 import { AuctionViewItem } from '@oyster/common/dist/lib/models/metaplex/index';
-import { getHandleAndRegistryKey } from '@solana/spl-name-service';
 import { MintInfo } from '@solana/spl-token';
 import { Link } from 'react-router-dom';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -95,7 +96,7 @@ export const AuctionView = () => {
   const creators = useCreators(auction);
   const wallet = useWallet();
   let edition = '';
-  console.log(art);
+  
   if (art.type === ArtType.NFT) {
     edition = 'Unique';
   } else if (art.type === ArtType.Master) {
@@ -110,6 +111,7 @@ export const AuctionView = () => {
   const attributes = data?.attributes;
 
   useEffect(() => {
+    console.log('art',art);
     return subscribeProgramChanges(
       connection,
       patchState,
@@ -289,30 +291,33 @@ const BidLine = (props: {
 }) => {
   const { bid, mint, isCancelled, isLastWinner } = props;
   const { publicKey } = useWallet();
-  const bidder = bid.info.bidderPubkey;
-  const isme = publicKey?.toBase58() === bidder;
+  const bidderPubkeyString = bid.info.bidderPubkey;
+  const isMe = publicKey?.toBase58() === bidderPubkeyString;
 
-  // Get Twitter Handle from address
   const connection = useConnection();
-  const [bidderTwitterHandle, setBidderTwitterHandle] = useState('');
+
+  const [bidderHandle, setBidderHandle] = useState<{
+    handle: string;
+    type: 'pubkey' | 'twitter' | '.sol';
+  }>({
+    handle: shortenAddress(bidderPubkeyString),
+    type: 'pubkey',
+  });
   useEffect(() => {
-    const getTwitterHandle = async (
-      connection: Connection,
-      bidder: StringPublicKey,
-    ): Promise<string | undefined> => {
-      try {
-        const [twitterHandle] = await getHandleAndRegistryKey(
-          connection,
-          toPublicKey(bidder),
-        );
-        setBidderTwitterHandle(twitterHandle);
-      } catch (err) {
-        console.warn(`err`);
-        return undefined;
+    const getBidderHandle = async () => {
+      const twitterHandle = await getTwitterHandle(connection, bidderPubkeyString);
+
+      if (twitterHandle) {
+        setBidderHandle({ handle: twitterHandle, type: 'twitter' });
+      } else {
+        const solDomain = await getSolDomain(connection, bidderPubkeyString);
+        if (solDomain) {
+          setBidderHandle({ handle: solDomain + '.sol', type: '.sol' });
+        }
       }
     };
-    getTwitterHandle(connection, bidder);
-  }, [bidderTwitterHandle]);
+    getBidderHandle();
+  }, []);
 
   return (
     <div
@@ -331,15 +336,15 @@ const BidLine = (props: {
           'metaplex-gap-2',
           {
             'auction-bid-line-item-is-canceled':
-              isCancelled && publicKey?.toBase58() === bidder,
+              isCancelled && publicKey?.toBase58() === bidderPubkeyString,
           },
         )}
       >
-        {isme && <CheckOutlined />}
         <AmountLabel
           displaySOL={true}
           amount={fromLamports(bid.info.lastBid, mint)}
-        />
+          />
+        {isMe && <CheckOutlined />}
       </div>
 
       <div>
@@ -348,18 +353,25 @@ const BidLine = (props: {
       </div>
 
       <div className="metaplex-flex metaplex-gap-4">
-        <Identicon size={24} address={bidder} />
-        {bidderTwitterHandle ? (
+        <Identicon size={24} address={bidderPubkeyString} />
+        {bidderHandle.type === 'twitter' ? (
           <a
             target="_blank"
             rel="noopener noreferrer"
-            title={shortenAddress(bidder)}
-            href={`https://twitter.com/${bidderTwitterHandle}`}
-          >{`@${bidderTwitterHandle}`}</a>
+            title={shortenAddress(bidderPubkeyString)}
+            href={`https://twitter.com/${bidderHandle.handle}`}
+          >{`@${bidderHandle.handle}`}</a>
+        ) : bidderHandle.type === '.sol' ? (
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            title={shortenAddress(bidderPubkeyString)}
+            href={`https://naming.bonfida.org/#/domain/${bidderHandle.handle}`} // this could also go to https://explorer.solana.com
+          >{`${bidderHandle.handle}.sol`}</a>
         ) : (
-          shortenAddress(bidder)
+          bidderHandle.handle
         )}
-        <ClickToCopy copyText={bidder} />
+        <ClickToCopy copyText={bidderPubkeyString} />
       </div>
     </div>
   );
