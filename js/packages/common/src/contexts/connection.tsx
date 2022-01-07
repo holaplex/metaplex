@@ -64,7 +64,7 @@ export const ENDPOINTS: { name: ENV; endpoint: string; ChainId: ChainId }[] = [
 ];
 
 const DEFAULT = ENDPOINTS[0].endpoint;
-const DEFAULT_CONNECTION_TIMEOUT = 300 * 1000;
+const DEFAULT_CONNECTION_TIMEOUT = 30 * 1000;
 
 interface ConnectionConfig {
   connection: Connection;
@@ -310,6 +310,7 @@ export const sendTransactions = async (
     const transaction = new Transaction();
     instructions.forEach(instruction => transaction.add(instruction));
     transaction.recentBlockhash = block.blockhash;
+
     transaction.setSigners(
       // fee payed by the wallet owner
       wallet.publicKey,
@@ -322,6 +323,8 @@ export const sendTransactions = async (
 
     unsignedTxns.push(transaction);
   }
+
+  const slot = await connection.getSlot('confirmed');
 
   const signedTxns = await wallet.signAllTransactions(unsignedTxns);
 
@@ -338,6 +341,7 @@ export const sendTransactions = async (
     const signedTxnPromise = sendSignedTransaction({
       connection,
       signedTransaction: signedTxns[i],
+      slot,
     }).then(res => {
         if (res.err) {
           failCallback(res.err, i);
@@ -476,6 +480,7 @@ export const sendTransactionWithRetry = async (
   transaction.recentBlockhash = (
     block || (await connection.getRecentBlockhash(commitment))
   ).blockhash;
+  const slot = await connection.getSlot('confirmed');
 
   if (includesFeePayer) {
     transaction.setSigners(...signers.map(s => s.publicKey));
@@ -500,6 +505,7 @@ export const sendTransactionWithRetry = async (
 
   return await sendSignedTransaction({
     connection,
+    slot,
     signedTransaction: transaction,
   });
 };
@@ -512,17 +518,18 @@ const DEFAULT_TIMEOUT = 30000;
 
 export type SendAndConfirmError =
   | { type: 'tx-error'; inner: TransactionError; txid: TransactionSignature }
+  | { type: 'timeout'; inner: unknown; txid?: TransactionSignature }
   | { type: 'misc-error'; inner: unknown; txid?: TransactionSignature };
 
+
 /** Mirror of web3.js's `sendAndConfirmRawTransaction`, but with better errors. */
+type SendAndConfirmRawTransactionExResponse = { ok: TransactionSignature; err?: undefined } | { ok?: undefined; err: SendAndConfirmError };
+
 export async function sendAndConfirmRawTransactionEx(
   connection: Connection,
   rawTransaction: Buffer,
   options?: ConfirmOptions,
-): Promise<
-  | { ok: TransactionSignature; err?: undefined }
-  | { ok?: undefined; err: SendAndConfirmError }
-> {
+): Promise<SendAndConfirmRawTransactionExResponse> {
   let txid: string | undefined;
 
   try {
@@ -542,8 +549,14 @@ export async function sendAndConfirmRawTransactionEx(
     }
 
     return { ok: txid };
-  } catch (e) {
-    return { err: { type: 'misc-error', inner: e, txid } };
+  } catch (e: any) {
+    let type: 'misc-error' | 'timeout' = 'misc-error';
+
+    if (e.message.includes('Transaction was not confirmed in')) {
+      type = 'timeout';
+    }
+
+    return { err: { type, inner: e, txid } };
   }
 }
 
@@ -553,9 +566,11 @@ export type SendSignedTransactionResult =
 
 export async function sendSignedTransaction({
   signedTransaction,
+  slot,
   connection,
 }: {
   signedTransaction: Transaction;
+  slot: number;
   connection: Connection;
   // sendingMessage?: string;
   // sentMessage?: string;
@@ -563,16 +578,30 @@ export async function sendSignedTransaction({
   // timeout?: number;
 }): Promise<SendSignedTransactionResult> {
   const rawTransaction = signedTransaction.serialize();
-  let slot = 0;
+  let nextSlot = slot;
+  const slotMax = nextSlot + 150;
+  let result: SendAndConfirmRawTransactionExResponse = { ok: "unknown" };
 
-  const result = await sendAndConfirmRawTransactionEx(
-    connection,
-    rawTransaction,
-    {
-      skipPreflight: true,
-      commitment: 'confirmed',
-    },
-  );
+  signedTransaction.recentBlockhash
+
+  while (nextSlot < slotMax) {
+    result = await sendAndConfirmRawTransactionEx(
+      connection,
+      rawTransaction,
+      {
+        skipPreflight: true,
+        commitment: 'confirmed',
+      },
+    );
+
+    if (result.ok || result?.err?.type !== 'timeout') {
+      break;
+    }
+
+    nextSlot = await connection.getSlot('confirmed');
+
+    console.log(`retrying transaction. will stop when counter reaches 0.`, slotMax - slot);
+  }
 
   if (result.err) return { err: result.err };
 
