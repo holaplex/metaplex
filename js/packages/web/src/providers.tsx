@@ -19,6 +19,10 @@ interface ProvidersProps {
 }
 
 export const Providers: FC<ProvidersProps> = ({ children, storefront }) => {
+  console.log('providers', {
+    storefront,
+    w: typeof window,
+  });
   return (
     <ConnectionProvider>
       <StoreProvider
@@ -44,3 +48,5 @@ export const Providers: FC<ProvidersProps> = ({ children, storefront }) => {
     </ConnectionProvider>
   );
 };
+
+export default Providers;

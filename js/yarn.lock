@@ -1340,6 +1340,25 @@
     eip1193-provider "^1.0.1"
     js-sha3 "^0.8.0"
 
+"@bonfida/spl-name-service@^0.1.24":
+  version "0.1.24"
+  resolved "https://registry.yarnpkg.com/@bonfida/spl-name-service/-/spl-name-service-0.1.24.tgz#2403bbff2ff6ea6fd07f91efc74b59926e58f3ed"
+  integrity sha512-9+iMNPIiTC8BbdzMgqYo7UjGgi7pONv86lOMkO0yxu12/sYw2ogrhap/r+d+BWRahwL4X7jWwDpXo8im2WcyjQ==
+  dependencies:
+    "@project-serum/sol-wallet-adapter" "^0.1.5"
+    "@solana/spl-token" "0.1.3"
+    "@solana/web3.js" "^1.29.2"
+    bip32 "^2.0.6"
+    bn.js "^5.1.3"
+    borsh "^0.6.0"
+    bs58 "4.0.1"
+    buffer-layout "^1.2.0"
+    core-util-is "^1.0.2"
+    csv-parser "^3.0.0"
+    fs "^0.0.1-security"
+    tweetnacl "^1.0.3"
+    webpack-dev-server "^3.11.2"
+
 "@bugsnag/browser@^7.11.0":
   version "7.11.0"
   resolved "https://registry.yarnpkg.com/@bugsnag/browser/-/browser-7.11.0.tgz#21866da8a4699ec87a2c908e228af938a3a3c312"
@@ -3552,6 +3571,14 @@
     bn.js "^5.1.2"
     buffer-layout "^1.2.0"
 
+"@project-serum/sol-wallet-adapter@^0.1.5":
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/@project-serum/sol-wallet-adapter/-/sol-wallet-adapter-0.1.8.tgz#90c6c1da793d32ed4ba3c67c5702a5bc804ef197"
+  integrity sha512-lKMgp7bsKpkrtBtIaEjtGuUMke0GUqFUL39Z7cjqsQpTVhkU5Ez4zHyjhXqAEORRGLFbwx/+H6HLpwppxpUDMQ==
+  dependencies:
+    bs58 "^4.0.1"
+    eventemitter3 "^4.0.4"
+
 "@project-serum/sol-wallet-adapter@^0.2.5":
   version "0.2.5"
   resolved "https://registry.yarnpkg.com/@project-serum/sol-wallet-adapter/-/sol-wallet-adapter-0.2.5.tgz#d949a8cc4d2f74e31e4f0205989703977689c76b"
@@ -3684,25 +3711,6 @@
   dependencies:
     buffer "~6.0.3"
 
-"@solana/spl-name-service@0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@solana/spl-name-service/-/spl-name-service-0.1.3.tgz#33659ac84a4ef2e8498a56e9b220786ee70abd9b"
-  integrity sha512-NIsa5xU8Fx9nIofM/mmrNI3s472kDBtNdqI6TbhIaVeP/DTYc9m5dkjvG32T1tZdNMv0kvFIpqZ0iAJvvZ/ABg==
-  dependencies:
-    "@solana/spl-token" "0.1.6"
-    "@solana/web3.js" "^1.21.0"
-    bip32 "^2.0.6"
-    bn.js "^5.1.3"
-    borsh "^0.4.0"
-    bs58 "4.0.1"
-    buffer-layout "^1.2.0"
-    core-util-is "^1.0.2"
-    crypto "^1.0.1"
-    crypto-ts "^1.0.2"
-    fs "^0.0.1-security"
-    tweetnacl "^1.0.3"
-    webpack-dev-server "^3.11.2"
-
 "@solana/spl-token-registry@0.2.202":
   version "0.2.202"
   resolved "https://registry.yarnpkg.com/@solana/spl-token-registry/-/spl-token-registry-0.2.202.tgz#bf990ffd9bd6aac60ee933b8987173fd50cd1b96"
@@ -3716,6 +3724,18 @@
   integrity sha512-d8tQlKjdpjeI4k1Lo2lQFkO/htYZanfg5aKHsmsybQb3wEOWB5HJqDZFktNg7xOowIbmxRt/RzpHjbhPYCgFNA==
   dependencies:
     cross-fetch "3.0.6"
+
+"@solana/spl-token@0.1.3":
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/@solana/spl-token/-/spl-token-0.1.3.tgz#6bf7c1a74cd95dabe8b8164e4c13b987db5be3bd"
+  integrity sha512-M251on5RDz8VQXoKoQPeLANEyI4qhThKLZBeUiLbFZ93KRgouGfmV5D/bUZXkLF75PlLcARIzU9ptoHOlZ6SbQ==
+  dependencies:
+    "@babel/runtime" "^7.10.5"
+    "@solana/web3.js" "^1.2.2"
+    bn.js "^5.1.0"
+    buffer "6.0.3"
+    buffer-layout "^1.2.0"
+    dotenv "8.2.0"
 
 "@solana/spl-token@0.1.6":
   version "0.1.6"
@@ -3954,7 +3974,7 @@
     superstruct "^0.14.2"
     tweetnacl "^1.0.0"
 
-"@solana/web3.js@^1.30.2":
+"@solana/web3.js@^1.2.2", "@solana/web3.js@^1.29.2", "@solana/web3.js@^1.30.2":
   version "1.31.0"
   resolved "https://registry.yarnpkg.com/@solana/web3.js/-/web3.js-1.31.0.tgz#7a313d4c1a90b77f27ddbfe845a10d6883e06452"
   integrity sha512-7nHHx1JNFnrt15e9y8m38I/EJCbaB+bFC3KZVM1+QhybCikFxGMtGA5r7PDC3GEL1R2RZA8yKoLkDKo3vzzqnw==
@@ -6331,6 +6351,15 @@ borsh@^0.4.0:
     bs58 "^4.0.0"
     text-encoding-utf-8 "^1.0.2"
 
+borsh@^0.6.0:
+  version "0.6.0"
+  resolved "https://registry.yarnpkg.com/borsh/-/borsh-0.6.0.tgz#a7c9eeca6a31ca9e0607cb49f329cb659eb791e1"
+  integrity sha512-sl5k89ViqsThXQpYa9XDtz1sBl3l1lI313cFUY1HKr+wvMILnb+58xpkqTNrYbelh99dY7K8usxoCusQmqix9Q==
+  dependencies:
+    bn.js "^5.2.0"
+    bs58 "^4.0.0"
+    text-encoding-utf-8 "^1.0.2"
+
 boxen@^5.0.0:
   version "5.1.2"
   resolved "https://registry.yarnpkg.com/boxen/-/boxen-5.1.2.tgz#788cb686fc83c1f486dfa8a40c68fc2b831d2b50"
@@ -7872,18 +7901,6 @@ crypto-random-string@^2.0.0:
   resolved "https://registry.yarnpkg.com/crypto-random-string/-/crypto-random-string-2.0.0.tgz#ef2a7a966ec11083388369baa02ebead229b30d5"
   integrity sha512-v1plID3y9r/lPhviJ1wrXpLeyUIGAZ2SHNYTEapm7/8A9nLPoyvVp3RK/EPFqn5kEznyWgYZNsRtYYIWbuG8KA==
 
-crypto-ts@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/crypto-ts/-/crypto-ts-1.0.2.tgz#c2ae47b42f1a8affcf33bddbe3283983150c8a05"
-  integrity sha1-wq5HtC8aiv/PM73b4yg5gxUMigU=
-  dependencies:
-    tslib "^1.7.1"
-
-crypto@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/crypto/-/crypto-1.0.1.tgz#2af1b7cad8175d24c8a1b0778255794a21803037"
-  integrity sha512-VxBKmeNcqQdiUQUW2Tzq0t377b54N2bMtXO/qiLa+6eRRmmC4qT3D4OnTGoT/U6O9aklQ/jTwbOtRMTTY8G0Ig==
-
 css-blank-pseudo@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/css-blank-pseudo/-/css-blank-pseudo-0.1.4.tgz#dfdefd3254bf8a82027993674ccf35483bfcb3c5"
@@ -8172,6 +8189,13 @@ csstype@^3.0.2:
   version "3.0.9"
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.0.9.tgz#6410af31b26bd0520933d02cbc64fce9ce3fbf0b"
   integrity sha512-rpw6JPxK6Rfg1zLOYCSwle2GFOOsnjmDYDaBwEcwoOg4qlsIVCN789VkBZDJAGi4T07gI4YSutR43t9Zz4Lzuw==
+
+csv-parser@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/csv-parser/-/csv-parser-3.0.0.tgz#b88a6256d79e090a97a1b56451f9327b01d710e7"
+  integrity sha512-s6OYSXAK3IdKqYO33y09jhypG/bSDHPuyCme/IdEHfWpLf/jKcpitVFyOC6UemgGk8v7Q5u2XE0vvwmanxhGlQ==
+  dependencies:
+    minimist "^1.2.0"
 
 currently-unhandled@^0.4.1:
   version "0.4.1"
@@ -8982,6 +9006,14 @@ enhanced-resolve@^4.3.0:
     graceful-fs "^4.1.2"
     memory-fs "^0.5.0"
     tapable "^1.0.0"
+
+enhanced-resolve@^5.7.0:
+  version "5.8.3"
+  resolved "https://registry.yarnpkg.com/enhanced-resolve/-/enhanced-resolve-5.8.3.tgz#6d552d465cce0423f5b3d718511ea53826a7b2f0"
+  integrity sha512-EGAbGvH7j7Xt2nc0E7D99La1OiEs8LnyimkRgwExpUMScN6O+3x9tIWs7PLQZVNx4YD+00skHXPXi1yQHpAmZA==
+  dependencies:
+    graceful-fs "^4.2.4"
+    tapable "^2.2.0"
 
 enquirer@^2.3.5, enquirer@^2.3.6:
   version "2.3.6"
@@ -15219,6 +15251,14 @@ next-tick@~1.0.0:
   resolved "https://registry.yarnpkg.com/next-tick/-/next-tick-1.0.0.tgz#ca86d1fe8828169b0120208e3dc8424b9db8342c"
   integrity sha1-yobR/ogoFpsBICCOPchCS524NCw=
 
+next-transpile-modules@^9.0.0:
+  version "9.0.0"
+  resolved "https://registry.yarnpkg.com/next-transpile-modules/-/next-transpile-modules-9.0.0.tgz#133b1742af082e61cc76b02a0f12ffd40ce2bf90"
+  integrity sha512-VCNFOazIAnXn1hvgYYSTYMnoWgKgwlYh4lm1pKbSfiB3kj5ZYLcKVhfh3jkPOg1cnd9DP+pte9yCUocdPEUBTQ==
+  dependencies:
+    enhanced-resolve "^5.7.0"
+    escalade "^3.1.1"
+
 next-with-less@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/next-with-less/-/next-with-less-1.0.1.tgz#ebcc500047ac82587133c8908720127a84c5eb22"
@@ -20325,6 +20365,11 @@ tapable@^1.0.0, tapable@^1.1.3:
   resolved "https://registry.yarnpkg.com/tapable/-/tapable-1.1.3.tgz#a1fccc06b58db61fd7a45da2da44f5f3a3e67ba2"
   integrity sha512-4WK/bYZmj8xLr+HUCODHGF1ZFzsYffasLUgEiMBY4fgtltdO6B4WJtlSbPaDTLpYTcGVwM2qLnFTICEcNxs3kA==
 
+tapable@^2.2.0:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/tapable/-/tapable-2.2.1.tgz#1967a73ef4060a82f12ab96af86d52fdb76eeca0"
+  integrity sha512-GNzQvQTOIP6RyTfE2Qxb8ZVlNmw0n88vp1szwWRimP02mnTsx3Wtn5qRdqY9w2XduFNUgvOwhNnQsjwCp+kqaQ==
+
 tar-fs@^2.0.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/tar-fs/-/tar-fs-2.1.1.tgz#489a15ab85f1f0befabb370b7de4f9eb5cbe8784"
@@ -20823,7 +20868,7 @@ tslib@2.1.0:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.1.0.tgz#da60860f1c2ecaa5703ab7d39bc05b6bf988b97a"
   integrity sha512-hcVC3wYEziELGGmEEXue7D75zbwIIVUMWAVbHItGPx0ziyXxrOMQx4rQEVEV45Ut/1IotuEvwqPopzIOkDMf0A==
 
-tslib@^1.10.0, tslib@^1.6.0, tslib@^1.7.1, tslib@^1.8.1, tslib@^1.9.0:
+tslib@^1.10.0, tslib@^1.6.0, tslib@^1.8.1, tslib@^1.9.0:
   version "1.14.1"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==

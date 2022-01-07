@@ -3,6 +3,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { ENDPOINTS, useConnectionConfig, useStore } from '@oyster/common';
 import { useLocation } from 'react-router';
 import { useSolPrice } from '../../contexts';
+import { useRouter } from 'next/router';
 
 export const GOOGLE_ANALYTICS_ID =
   process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID || 'G-HLNC4C2YKN';
@@ -36,7 +37,8 @@ export function AnalyticsProvider(props: { children: React.ReactNode }) {
   const { publicKey } = useWallet();
   const { storefront } = useStore();
   const { endpoint } = useConnectionConfig();
-  const location = useLocation();
+  // const location = useLocation();
+  const router = useRouter();
   const solPrice = useSolPrice();
 
   // user pubkey / id
@@ -60,9 +62,16 @@ export function AnalyticsProvider(props: { children: React.ReactNode }) {
     });
   }, [pubkey, endpointName]);
 
+  // useEffect(() => {
+  //   pageview(location.pathname);
+  // }, [location]);
   useEffect(() => {
-    pageview(location.pathname);
-  }, [location]);
+    router.events.on('routeChangeComplete', pageview);
+
+    return () => {
+      router.events.off('routeChangeComplete', pageview);
+    };
+  }, [router.events]);
 
   function setUserProperties(attributes: AnalyticsUserProperties) {
     gtag('set', 'user_properties', {

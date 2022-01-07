@@ -1,9 +1,14 @@
 const withPlugins = require('next-compose-plugins');
 const withLess = require('next-with-less');
+const withTM = require('next-transpile-modules')([
+  '@solana/wallet-adapter-react',
+  '@project-serum/sol-wallet-adapter',
+]);
 
 const assetPrefix = process.env.ASSET_PREFIX || '';
 
 const plugins = [
+  withTM,
   [
     withLess,
     {
@@ -41,12 +46,16 @@ module.exports = withPlugins(plugins, {
     NEXT_PUBLIC_CLIENT_ID: process.env.REACT_APP_CLIENT_ID,
     NEXT_PUBLIC_IPFS_CDN: process.env.NEXT_PUBLIC_IPFS_CDN,
   },
-  async rewrites() {
-    return [
-      {
-        source: '/:any*',
-        destination: '/',
-      },
-    ];
-  },
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: '/creators*',
+  //       destination: '/creators/',
+  //     },
+  //     {
+  //       source: '/:any*',
+  //       destination: '/',
+  //     },
+  //   ];
+  // },
 });
