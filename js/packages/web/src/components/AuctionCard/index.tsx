@@ -18,6 +18,7 @@ import {
   programIds,
   useConnection,
   useMint,
+  useStore,
   useUserAccounts,
   useWalletModal,
   VaultState,
@@ -70,6 +71,7 @@ import { useAnalytics } from '../Analytics';
 import { AuctionCountdown, AuctionNumbers } from '../AuctionNumbers';
 import { HowAuctionsWorkModal } from '../HowAuctionsWorkModal';
 import { endSale } from './utils/endSale';
+import { CrossMintButton } from '@crossmint/client-sdk-react-ui';
 
 const { Text } = Typography;
 
@@ -243,6 +245,7 @@ export const AuctionCard = ({
     [wallet.wallet, wallet.connect, setVisible],
   );
   const navigate = useNavigate();
+  const { storefront } = useStore();
 
   const mintInfo = useMint(auctionView.auction.info.tokenMint);
   const { prizeTrackingTickets, bidRedemptions } = useMeta();
@@ -772,6 +775,14 @@ export const AuctionCard = ({
     </Button>
   );
 
+  // CrossMint credit card checkout
+  const crossmintBtn = (
+    <CrossMintButton
+      listingId={auctionView.auction.pubkey}
+      style={{ width: '100%', height: '40px', borderRadius: '2px' }}
+    />
+  );
+
   // Components for inputting bid amount and placing a bid
   const placeBidUI = (
     <Space
@@ -944,7 +955,12 @@ export const AuctionCard = ({
           {showDefaultNonEndedAction &&
             (showStartAuctionBtn
               ? startAuctionBtn
-              : auctionView.isInstantSale && instantSaleBtn)}
+              : auctionView.isInstantSale && (
+                  <>
+                    {instantSaleBtn}
+                    {storefront.integrations?.crossmintClientId && crossmintBtn}
+                  </>
+                ))}
           {!hideDefaultAction && !wallet.connected && (
             <Button
               className="metaplex-fullwidth metaplex-margin-top-4 metaplex-round-corners"

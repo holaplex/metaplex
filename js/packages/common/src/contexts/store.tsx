@@ -43,6 +43,7 @@ export interface StorefrontIntegrations {
   twitterVerification?: string;
   hotjar?: string;
   segment?: string;
+  crossmintClientId?: string;
 }
 
 export interface Storefront {
@@ -130,7 +131,10 @@ export const StoreProvider: FC<{
   const setStoreForOwner = useMemo(
     () => async (ownerAddress?: string) => {
       const storeAddress = await getStoreID(ownerAddress);
-      const twitterHandle = await getTwitterHandle(connection, ownerAddress as string);
+      const twitterHandle = await getTwitterHandle(
+        connection,
+        ownerAddress as string,
+      );
 
       setProgramIds(storeAddress); // fallback
       setTwitterHandle(twitterHandle);
@@ -149,7 +153,7 @@ export const StoreProvider: FC<{
       setProgramIds(initStoreAddress); // fallback
       console.log(`CUSTOM STORE FROM ENV: ${initStoreAddress}`);
     }
-    
+
     setLoadingStore(false);
   }, [initOwnerAddress]);
 
@@ -165,7 +169,7 @@ export const StoreProvider: FC<{
           integrations: {
             ...storefront.integrations,
             twitterVerification: twitterHandle,
-          }
+          },
         },
         loadingStore,
       }}

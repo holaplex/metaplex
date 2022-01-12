@@ -45,6 +45,7 @@ import { cacheAllAuctions } from '../../actions';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useAuctionManagersToCache, useNotifications } from '../../hooks';
 import Bugsnag from '@bugsnag/browser';
+import { CrossMintStatusButton } from '@crossmint/client-sdk-react-ui';
 
 export const AdminView = () => {
   const { store, whitelistedCreatorsByCreator, isLoading, patchState } =
@@ -430,6 +431,36 @@ function InnerAdminView({
         ]}
         dataSource={notifications}
       />
+
+      {storefront.integrations?.crossmintClientId && (
+        <div
+          className="metaplex-flex-column metaplex-gap-4"
+          style={{ marginBottom: '12px' }}
+        >
+          <h2>Credit Card Payments</h2>
+
+          <p style={{ marginBottom: '0px' }}>
+            Increase your sales by accepting credit and debit card payments.
+            This service is provided by CrossMint and is 100% free for sellers.
+            <a
+              href="https://www.crossmint.io/faq"
+              target="_blank"
+              rel="noreferrer"
+              style={{ marginLeft: '5px' }}
+            >
+              Learn more
+            </a>
+          </p>
+
+          <div>
+            <CrossMintStatusButton style={{ fontFamily: 'Work Sans' }} />
+          </div>
+          <p>
+            Note: credit card payments are currently only supported for instant
+            sale auctions. More sale types coming soon.
+          </p>
+        </div>
+      )}
 
       <div className="metaplex-flex-column metaplex-gap-4">
         <h2>Administrator Actions</h2>
