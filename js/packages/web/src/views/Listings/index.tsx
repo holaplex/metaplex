@@ -147,14 +147,17 @@ export const Listings = () => {
       ) : (
         <>
           <MetaplexMasonry>
-            {auctions.map(m => {
-              const id = m.auction.pubkey;
-              return (
-                <Link to={`/listings/${id}`} key={id}>
-                  <AuctionRenderCard key={id} auctionView={m} />
-                </Link>
-              );
-            })}
+            {auctions
+              .filter(m => m.items.length > 0)
+              .map(m => {
+                console.log(m);
+                const id = m.auction.pubkey;
+                return (
+                  <Link to={`/listings/${id}`} key={id}>
+                    <AuctionRenderCard key={id} auctionView={m} />
+                  </Link>
+                );
+              })}
           </MetaplexMasonry>
           {hasNextPage && (
             <div key="more" className="app-section--loading" ref={sentryRef}>
