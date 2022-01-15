@@ -83,8 +83,6 @@ export const Listings = () => {
     },
   ];
 
-  console.log('jeff', auctions);
-
   return (
     <>
       {showCacheAuctionsAlert && (
