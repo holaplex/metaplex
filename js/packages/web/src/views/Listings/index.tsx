@@ -83,6 +83,8 @@ export const Listings = () => {
     },
   ];
 
+  console.log('jeff', auctions);
+
   return (
     <>
       {showCacheAuctionsAlert && (
@@ -148,9 +150,8 @@ export const Listings = () => {
         <>
           <MetaplexMasonry>
             {auctions
-              .filter(m => m.items.length > 0)
+              .filter(m => m.thumbnail)
               .map(m => {
-                console.log(m);
                 const id = m.auction.pubkey;
                 return (
                   <Link to={`/listings/${id}`} key={id}>

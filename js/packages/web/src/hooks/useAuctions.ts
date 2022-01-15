@@ -311,13 +311,8 @@ export const useInfiniteScrollAuctions = (view: View) => {
         resale: initializedAuctions
           .filter(isActiveSale(true))
           .sort(sortByRecentlyEnded),
+        all: initializedAuctions,
       };
-
-      setAuctionsCount({
-        live: auctionDisplayOrders[View.live].length,
-        resale: auctionDisplayOrders[View.resale].length,
-        ended: auctionDisplayOrders[View.ended].length,
-      });
 
       const auctionManagers = (auctionDisplayOrders[view] || []).map(
         auction => auctionManagersByAuction[auction.pubkey],
@@ -331,6 +326,23 @@ export const useInfiniteScrollAuctions = (view: View) => {
       );
 
       const viewState = merge({}, metaState, auctionsState);
+
+      const invalidAuctions = gatherAuctionViews(
+        (auctionDisplayOrders['all'] || []).map(
+          auction => auctionManagersByAuction[auction.pubkey],
+        ),
+        viewState,
+      )
+        .filter(x => !x.thumbnail)
+        .map(x => x.auction.pubkey);
+
+      setAuctionsCount({
+        live: auctionDisplayOrders[View.live].length,
+        resale: auctionDisplayOrders[View.resale].length,
+        ended: auctionDisplayOrders[View.ended].filter(
+          x => !invalidAuctions.includes(x.pubkey),
+        ).length,
+      });
 
       const views = gatherAuctionViews(auctionsToLoad, viewState);
 
