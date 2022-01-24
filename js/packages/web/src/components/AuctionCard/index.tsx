@@ -299,10 +299,11 @@ export const AuctionCard = ({
   // JS MODULO OPERATOR DOES NOT WORK HOW YOU EXPECT IT TO
   // BREAKS WITH FLOATS, MULTIPLY AWAY ALL FLOATS
   // see this for some info https://stackoverflow.com/questions/3966484/why-does-modulus-operator-return-fractional-number-in-javascript
+  const multiplier = 1000;
   const tickSizeInvalid = !!(
     tickSize &&
     value &&
-    (value * 100) % (fromLamports(tickSize) * 100) != 0
+    (value * multiplier) % (fromLamports(tickSize) * multiplier) != 0
   );
 
   const gapBidInvalid = useGapTickCheck(value, gapTick, gapTime, auctionView);
@@ -539,8 +540,8 @@ export const AuctionCard = ({
             navigate('/owned');
           },
         });
-      } catch (e: any) {
-        Bugsnag.notify(e);
+      } catch (err: any) {
+        Bugsnag.notify(err);
 
         notification.error({
           message: 'Purchase Error',

@@ -9,6 +9,7 @@
     "@bugsnag/source-maps": "^2.3.0",
     "@cloudflare/stream-react": "^1.1.0",
     "@crossmint/client-sdk-react-ui": "0.0.8-alpha.2",
+    "@holaplex/solana-web3-tools": "^0.1.7",
     "@google/model-viewer": "^1.7.2",
     "@magic-ext/solana": "^0.2.0",
     "@metaplex/js": "^4.9.0",
@@ -51,6 +52,7 @@
     "react-masonry-css": "^1.0.16",
     "react-router-dom": "^6.1.1",
     "react-virtualized": "^9.22.3",
+    "redis": "^4.0.1",
     "three": "^0.128.0",
     "timeago.js": "^4.0.2"
   },

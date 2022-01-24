@@ -3,17 +3,29 @@ import {
   Storefront,
   ArweaveQueryResponse,
 } from '@oyster/common';
+import {
+  createClient,
+  RedisClientOptions,
+  RedisModules,
+  RedisScripts,
+} from 'redis';
+import moment from 'moment';
 import { maybeCDN } from '../utils/cdn';
 
 const ARWEAVE_URL = process.env.NEXT_PUBLIC_ARWEAVE_URL;
-
+const REDIS_URL = process.env.REDIS_URL;
+const REDIS_TLS_ENABLED = process.env.REDIS_TLS_ENABLED === 'true';
 const pubkeyDenyList = [
   'Fy8GCo5pyaMmUS6BqydzYnHBYeQN5BnKijCV2x2pRc3n',
   '9ztzyU9eFuce42CHD7opPxpjrsg15onjNARnmuMS2aQy',
   '5pKYHnoCMyjVqVdZaGAs63wUSBvhEGWnz5ie2YC5MaZx',
+  'D2bj7rCLC4Dy9ZJuDNm5jFRNn5bqVTTpn16nnqDYmciv',
+  'DYE359beVPHzLUuwAYAqujJ9d8JwFszAcus9qht5moxT',
+  '8K7zyrvVLDacNRJeFZui4cazW1XUkWKRnm7UmnBGQPdS',
+  'E6EWhx9PRwh3ryHGiWzGb6KceA71kWcg9i5pKuikTtUi',
 ];
 
-export const getStorefront = async (
+const fetchFromSource = async (
   subdomain: string,
 ): Promise<Storefront | null> => {
   try {
@@ -58,12 +70,11 @@ export const getStorefront = async (
 
       return acc;
     }, {});
-
     if (pubkeyDenyList.includes(values['solana:pubkey'])) {
       return null;
     }
 
-    return {
+    const storefront = {
       subdomain,
       pubkey: values['solana:pubkey'],
       theme: {
@@ -94,8 +105,66 @@ export const getStorefront = async (
         crossmintClientId: values['crossmint:clientId'] || null,
       },
     };
-  } catch (err) {
+    return storefront;
+  } catch (err: any) {
     console.error(err);
     return null;
   }
+};
+
+export const getStorefront = async (
+  subdomain: string,
+): Promise<Storefront | undefined> => {
+  let cached: Storefront | undefined = undefined;
+
+  const redisClientOptions: RedisClientOptions<RedisModules, RedisScripts> = {
+    url: REDIS_URL,
+  };
+
+  if (REDIS_TLS_ENABLED) {
+    redisClientOptions.socket = {
+      tls: true,
+      rejectUnauthorized: false,
+    };
+  }
+
+  const client = createClient(redisClientOptions);
+
+  await client.connect();
+
+  const [storefront, timestamp] = await Promise.all([
+    client.get(subdomain),
+    client.get(`${subdomain}-timestamp`),
+  ]);
+
+  if (storefront) {
+    cached = JSON.parse(storefront);
+  }
+
+  const now = moment();
+  const lastSavedAt = moment(timestamp);
+
+  const duration = moment.duration(now.diff(lastSavedAt)).as('minutes');
+
+  if (duration < 2 && cached) {
+    await client.quit();
+    return cached;
+  }
+
+  const source = await fetchFromSource(subdomain);
+
+  if (source) {
+    await client
+      .multi()
+      .set(subdomain, JSON.stringify(source))
+      .set(`${subdomain}-timestamp`, now.format())
+      .exec();
+
+    await client.quit();
+    return source;
+  }
+
+  await client.quit();
+
+  return cached;
 };
