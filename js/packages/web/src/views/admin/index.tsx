@@ -46,6 +46,14 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { useAuctionManagersToCache, useNotifications } from '../../hooks';
 import Bugsnag from '@bugsnag/browser';
 import { CrossMintStatusButton } from '@crossmint/client-sdk-react-ui';
+import styled from 'styled-components';
+
+const StyledLink = styled(Link)`
+  text-decoration: underline;
+  &:hover {
+    text-decoration: underline;
+  }
+`;
 
 export const AdminView = () => {
   const { store, whitelistedCreatorsByCreator, isLoading, patchState } =
@@ -147,7 +155,7 @@ export const AdminView = () => {
       ) : (
         <>
           <p>Store is not initialized</p>
-          <Link to="/">Go to initialize</Link>
+          <StyledLink to="/">Go to initialize</StyledLink>
         </>
       )}
     </>
@@ -432,35 +440,45 @@ function InnerAdminView({
         dataSource={notifications}
       />
 
-      {storefront.integrations?.crossmintClientId && (
-        <div
-          className="metaplex-flex-column metaplex-gap-4"
-          style={{ marginBottom: '12px' }}
-        >
-          <h2>Credit Card Payments</h2>
-
-          <p style={{ marginBottom: '0px' }}>
-            Increase your sales by accepting credit and debit card payments.
-            This service is provided by CrossMint and is 100% free for sellers.
-            <a
-              href="https://www.crossmint.io/faq"
-              target="_blank"
-              rel="noreferrer"
-              style={{ marginLeft: '5px' }}
-            >
-              Learn more
-            </a>
-          </p>
-
-          <div>
-            <CrossMintStatusButton style={{ fontFamily: 'Work Sans' }} />
-          </div>
-          <p>
-            Note: credit card payments are currently only supported for instant
-            sale auctions. More sale types coming soon.
-          </p>
+      <h2>Credit Card Payments</h2>
+      <div className="metaplex-flex-column metaplex-gap-4">
+        <p>
+          Increase your sales by accepting credit and debit card payments
+          using&nbsp;
+          <StyledLink
+            to="https://www.crossmint.io/faq"
+            target="_blank"
+            rel="noreferrer"
+          >
+            CrossMint
+          </StyledLink>
+          . CrossMint is 100% free for sellers.
+        </p>
+        <div>
+          {storefront.integrations?.crossmintClientId ? (
+            <CrossMintStatusButton style={{ fontWeight: 'normal' }} />
+          ) : (
+            <p>
+              NOTE: Your store is not yet ready to use CrossMint. To get
+              started, please visit{' '}
+              <StyledLink
+                to="https://www.holaplex.com/storefront/edit"
+                target="_blank"
+                rel="noreferrer"
+              >
+                https://www.holaplex.com/storefront/edit
+              </StyledLink>
+              , connect your wallet, and click on the Update button. Once your
+              store is successfully updated, return here to finish setting up
+              CrossMint.
+            </p>
+          )}
         </div>
-      )}
+        <p>
+          Please note that credit card payments are currently only supported for
+          instant sale auctions. More sale types are coming soon.
+        </p>
+      </div>
 
       <div className="metaplex-flex-column metaplex-gap-4">
         <h2>Administrator Actions</h2>
@@ -496,10 +514,9 @@ function InnerAdminView({
             <h3>Cache Auctions</h3>
             <p>
               Activate your storefront listing caches by pressing &ldquo;build
-              cache&rdquo;. This will reduce page load times for your
-              listings. Your storefront will start looking up listing using
-              the cache on November 17th. To preview the speed improvement
-              visit the Holaplex{' '}
+              cache&rdquo;. This will reduce page load times for your listings.
+              Your storefront will start looking up listing using the cache on
+              November 17th. To preview the speed improvement visit the Holaplex{' '}
               <a
                 rel="noopener noreferrer"
                 target="_blank"

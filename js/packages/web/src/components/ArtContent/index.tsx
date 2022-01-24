@@ -102,6 +102,7 @@ const VideoArtContent = ({
     likelyVideo &&
     likelyVideo.startsWith('https://watch.videodelivery.net/') ? (
       <Stream
+        // @ts-ignore // TODO -- FIX THIS
         streamRef={(e: any) => playerRef(e)}
         src={likelyVideo.replace('https://watch.videodelivery.net/', '')}
         loop={true}
@@ -121,7 +122,9 @@ const VideoArtContent = ({
         poster={uri}
       >
         {likelyVideo && <source src={likelyVideo} type="video/mp4" />}
-        {animationURL && <source src={maybeCDN(animationURL)} type="video/mp4" />}
+        {animationURL && (
+          <source src={maybeCDN(animationURL)} type="video/mp4" />
+        )}
         {(
           files?.filter(f => !!f && typeof f !== 'string') as MetadataFile[]
         )?.map((f: MetadataFile, i) => (

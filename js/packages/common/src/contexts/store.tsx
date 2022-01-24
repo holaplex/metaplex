@@ -128,6 +128,8 @@ export const StoreProvider: FC<{
     isReady: Boolean(!initOwnerAddress || initStoreAddress),
   });
 
+  console.log('Storefront:', storefront);
+
   const setStoreForOwner = useMemo(
     () => async (ownerAddress?: string) => {
       const storeAddress = await getStoreID(ownerAddress);
