@@ -780,6 +780,7 @@ export const AuctionCard = ({
   const crossmintBtn = (
     <CrossMintButton
       listingId={auctionView.auction.pubkey}
+      // todo -- rmv inline styles once this component is testable.
       style={{ width: '100%', height: '40px', borderRadius: '2px' }}
     />
   );
