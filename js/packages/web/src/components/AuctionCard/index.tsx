@@ -18,7 +18,6 @@ import {
   programIds,
   useConnection,
   useMint,
-  useStore,
   useUserAccounts,
   useWalletModal,
   VaultState,
@@ -245,7 +244,6 @@ export const AuctionCard = ({
     [wallet.wallet, wallet.connect, setVisible],
   );
   const navigate = useNavigate();
-  const { storefront } = useStore();
 
   const mintInfo = useMint(auctionView.auction.info.tokenMint);
   const { prizeTrackingTickets, bidRedemptions } = useMeta();
@@ -957,12 +955,7 @@ export const AuctionCard = ({
           {showDefaultNonEndedAction &&
             (showStartAuctionBtn
               ? startAuctionBtn
-              : auctionView.isInstantSale && (
-                  <>
-                    {instantSaleBtn}
-                    {storefront.integrations?.crossmintClientId && crossmintBtn}
-                  </>
-                ))}
+              : auctionView.isInstantSale && instantSaleBtn)}
           {!hideDefaultAction && !wallet.connected && (
             <Button
               className="metaplex-fullwidth metaplex-margin-top-4 metaplex-round-corners"
@@ -974,6 +967,8 @@ export const AuctionCard = ({
               {auctionView.isInstantSale ? 'purchase' : 'place bid'}
             </Button>
           )}
+
+          {crossmintBtn}
 
           {showRedeemReclaimRefundBtn && redeemReclaimRefundBtn}
 
