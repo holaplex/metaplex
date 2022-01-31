@@ -5,7 +5,6 @@ import {
   Commitment,
 } from '@solana/web3.js';
 import {
-  sendTransactionWithRetry,
   placeBid,
   cache,
   ensureWrappedAccount,
@@ -23,6 +22,7 @@ import { AuctionView } from '../hooks';
 import BN from 'bn.js';
 import { setupCancelBid } from './cancelBid';
 import { QUOTE_MINT } from '../constants';
+import { SmartInstructionSender } from '@holaplex/solana-web3-tools';
 
 export async function sendPlaceBid(
   connection: Connection,
@@ -47,17 +47,33 @@ export async function sendPlaceBid(
     signers,
   );
 
-  const res = await sendTransactionWithRetry(
-    connection,
-    wallet,
-    instructions[0],
-    signers[0],
-    commitment,
-  );
+  let bidError: Error | null = null;
+  let txid = '';
 
-  if (res.err) throw res.err.inner;
+  await SmartInstructionSender.build(wallet as any, connection)
+    .config({
+      abortOnFailure: true,
+      maxSigningAttempts: 3,
+      commitment: commitment,
+    })
+    .withInstructionSets(
+      instructions.map((ixs, i) => ({
+        instructions: ixs,
+        signers: signers[i],
+      })),
+    )
+    .onFailure(err => {
+      bidError = err;
+    })
+    .onProgress((_, x) => {
+      txid = x;
+      console.log('transaction ID:', x);
+    })
+    .send();
 
-  const { txid } = res;
+  if (bidError) {
+    throw bidError;
+  }
 
   return {
     amount: bid,
