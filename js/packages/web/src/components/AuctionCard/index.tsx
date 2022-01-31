@@ -18,6 +18,7 @@ import {
   programIds,
   useConnection,
   useMint,
+  useStore,
   useUserAccounts,
   useWalletModal,
   VaultState,
@@ -234,6 +235,7 @@ export const AuctionCard = ({
   hideDefaultAction?: boolean;
   action?: JSX.Element;
 }) => {
+  const { storefront } = useStore();
   const connection = useConnection();
   const { patchState } = useMeta();
 
@@ -968,7 +970,9 @@ export const AuctionCard = ({
             </Button>
           )}
 
-          {crossmintBtn}
+          {auctionView.isInstantSale &&
+            storefront.integrations?.crossmintClientId &&
+            crossmintBtn}
 
           {showRedeemReclaimRefundBtn && redeemReclaimRefundBtn}
 
