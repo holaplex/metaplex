@@ -235,6 +235,7 @@ export const AuctionCard = ({
   hideDefaultAction?: boolean;
   action?: JSX.Element;
 }) => {
+  const { storefront } = useStore();
   const connection = useConnection();
   const { patchState } = useMeta();
 
@@ -245,7 +246,6 @@ export const AuctionCard = ({
     [wallet.wallet, wallet.connect, setVisible],
   );
   const navigate = useNavigate();
-  const { storefront } = useStore();
 
   const mintInfo = useMint(auctionView.auction.info.tokenMint);
   const { prizeTrackingTickets, bidRedemptions } = useMeta();
@@ -957,12 +957,7 @@ export const AuctionCard = ({
           {showDefaultNonEndedAction &&
             (showStartAuctionBtn
               ? startAuctionBtn
-              : auctionView.isInstantSale && (
-                  <>
-                    {instantSaleBtn}
-                    {storefront.integrations?.crossmintClientId && crossmintBtn}
-                  </>
-                ))}
+              : auctionView.isInstantSale && instantSaleBtn)}
           {!hideDefaultAction && !wallet.connected && (
             <Button
               className="metaplex-fullwidth metaplex-margin-top-4 metaplex-round-corners"
@@ -974,6 +969,10 @@ export const AuctionCard = ({
               {auctionView.isInstantSale ? 'purchase' : 'place bid'}
             </Button>
           )}
+
+          {auctionView.isInstantSale &&
+            storefront.integrations?.crossmintClientId &&
+            crossmintBtn}
 
           {showRedeemReclaimRefundBtn && redeemReclaimRefundBtn}
 
