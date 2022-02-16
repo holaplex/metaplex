@@ -39,7 +39,8 @@ export async function getServerSideProps(context: NextPageContext) {
     }, {});
   const host = (forwarded?.host || headers.host) ?? '';
   let subdomain = host.split(':')[0].split('.')[0];
-
+  
+  subdomain = 'dnk1';
   if (process.env.SUBDOMAIN && !process.env.STRICT_SUBDOMAIN) {
     subdomain = process.env.SUBDOMAIN;
   }

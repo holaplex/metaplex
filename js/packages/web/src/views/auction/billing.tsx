@@ -37,7 +37,7 @@ import {
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useMeta } from '../../contexts';
 import { Connection } from '@solana/web3.js';
-import { settle } from '../../actions/settle';
+import { claimSpecificBid, settle } from '../../actions/settle';
 import { MintInfo } from '@solana/spl-token';
 import { LoadingOutlined } from '@ant-design/icons';
 const { Content } = Layout;
@@ -46,7 +46,7 @@ const { Text } = Typography;
 export const BillingView = () => {
   const { id } = useParams<{ id: string }>();
 
-  if (!id) {
+  if (!id?.length) {
     return <></>;
   }
 
@@ -599,6 +599,57 @@ export const InnerBillingView = ({
                 name: whitelistedCreatorsByCreator[t]?.info?.name || 'N/A',
                 address: t,
                 amountPaid: payoutTickets[t].sum,
+              }))}
+            />
+          </Col>
+        </Row>
+        <Row>
+          <Col span={24}>
+            <Table
+              loading={{
+                spinning: loading,
+                indicator: <LoadingOutlined />,
+              }}
+              columns={[
+                {
+                  title: 'Bidder',
+                  dataIndex: 'bidder',
+                  key: 'bidder',
+                },
+                {
+                  title: 'Bidder pot key',
+                  dataIndex: 'bidToClaim',
+                  key: 'bidToClaim',
+                },
+                {
+                  title: 'Action',
+                  dataIndex: 'action',
+                  key: 'action',
+                  render: (pot: ParsedAccount<BidderPot>) => (
+                    <Button
+                      type="primary"
+                      size="large"
+                      className="action-btn"
+                      disabled={pot.info.emptied}
+                      onClick={async () => {
+                        await claimSpecificBid(
+                          connection,
+                          wallet,
+                          auctionView,
+                          pot,
+                        );
+                      }}
+                    >
+                      SETTLE
+                    </Button>
+                  ),
+                },
+              ]}
+              dataSource={bidsToClaim.map(b => ({
+                key: b.metadata.info.bidderPubkey,
+                bidder: b.metadata.info.bidderPubkey,
+                bidToClaim: b.pot.pubkey,
+                action: b.pot,
               }))}
             />
           </Col>

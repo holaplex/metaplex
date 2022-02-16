@@ -13,6 +13,24 @@ export async function claimBid(
   tokenMint: StringPublicKey,
   instructions: TransactionInstruction[],
 ) {
+  instructions.push(
+    await createClaimBidTransactionInstruction(
+      acceptPayment,
+      bidder,
+      bidderPotToken,
+      vault,
+      tokenMint,
+    ),
+  );
+}
+
+export const createClaimBidTransactionInstruction = async (
+  acceptPayment: StringPublicKey,
+  bidder: StringPublicKey,
+  bidderPotToken: StringPublicKey,
+  vault: StringPublicKey,
+  tokenMint: StringPublicKey,
+) => {
   const PROGRAM_IDS = programIds();
   const store = PROGRAM_IDS.store;
   if (!store) {
@@ -104,11 +122,9 @@ export async function claimBid(
     },
   ];
 
-  instructions.push(
-    new TransactionInstruction({
-      keys,
-      programId: toPublicKey(PROGRAM_IDS.metaplex),
-      data,
-    }),
-  );
-}
+  return new TransactionInstruction({
+    keys,
+    programId: toPublicKey(PROGRAM_IDS.metaplex),
+    data,
+  });
+};

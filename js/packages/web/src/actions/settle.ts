@@ -14,7 +14,10 @@ import {
 
 import { AuctionView } from '../hooks';
 
-import { claimBid } from '@oyster/common/dist/lib/models/metaplex/claimBid';
+import {
+  claimBid,
+  createClaimBidTransactionInstruction,
+} from '@oyster/common/dist/lib/models/metaplex/claimBid';
 import { emptyPaymentAccount } from '@oyster/common/dist/lib/models/metaplex/emptyPaymentAccount';
 import { QUOTE_MINT } from '../constants';
 import { setupPlaceBid } from './sendPlaceBid';
@@ -234,6 +237,38 @@ async function emptyPaymentAccountForAllTokens(
     }
   }
 }
+
+export const claimSpecificBid = async (
+  connection: Connection,
+  wallet: WalletSigner,
+  auctionView: AuctionView,
+  bid: ParsedAccount<BidderPot>,
+) => {
+  await SmartInstructionSender.build(wallet, connection)
+    .config({
+      abortOnFailure: true,
+      maxSigningAttempts: 3,
+      commitment: 'single',
+    })
+    .withInstructionSets([
+      {
+        instructions: [
+          await createClaimBidTransactionInstruction(
+            auctionView.auctionManager.acceptPayment,
+            bid.info.bidderAct,
+            bid.info.bidderPot,
+            auctionView.vault.pubkey,
+            auctionView.auction.info.tokenMint,
+          ),
+        ],
+        signers: [],
+      },
+    ])
+    .onFailure(err => {
+      throw err;
+    })
+    .send();
+};
 
 async function claimAllBids(
   connection: Connection,
