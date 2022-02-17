@@ -22,7 +22,11 @@ import { emptyPaymentAccount } from '@oyster/common/dist/lib/models/metaplex/emp
 import { QUOTE_MINT } from '../constants';
 import { setupPlaceBid } from './sendPlaceBid';
 import { WalletNotConnectedError } from '@solana/wallet-adapter-base';
-import { SmartInstructionSender } from '@holaplex/solana-web3-tools';
+import {
+  FailureCb,
+  ProgressCb,
+  SmartInstructionSender,
+} from '@holaplex/solana-web3-tools';
 
 const BATCH_SIZE = 10;
 const SETTLE_TRANSACTION_SIZE = 6;
@@ -189,10 +193,14 @@ export async function createEmptyPaymentAccountForAllTokensIX(
   return { signers, instructions };
 }
 
-async function emptyPaymentAccountForAllTokens(
+export async function emptyPaymentAccountForAllTokens(
   connection: Connection,
   wallet: WalletSigner,
   auctionView: AuctionView,
+  {
+    onProgress,
+    onFailure,
+  }: { onProgress?: ProgressCb; onFailure?: FailureCb } = {},
 ) {
   const { instructions, signers } =
     await createEmptyPaymentAccountForAllTokensIX(
@@ -206,7 +214,7 @@ async function emptyPaymentAccountForAllTokens(
     let emptyPaymentTokenError: Error | null = null;
 
     if (instructionBatch.length >= 2) {
-      await SmartInstructionSender.build(wallet, connection)
+      const sender = SmartInstructionSender.build(wallet, connection)
         .config({
           abortOnFailure: true,
           maxSigningAttempts: 3,
@@ -217,23 +225,32 @@ async function emptyPaymentAccountForAllTokens(
             instructions: ixs,
             signers: signerBatch[i],
           })),
-        )
-        .onFailure(err => {
-          emptyPaymentTokenError = err;
-        })
-        .send();
+        );
+      if (onProgress) {
+        sender.onProgress(onProgress);
+      }
+      if (onFailure) {
+        sender.onFailure((...args) => {
+          emptyPaymentTokenError = args[0];
+          onFailure(...args);
+        });
+      }
+      await sender.send();
 
       if (emptyPaymentTokenError) {
         throw emptyPaymentTokenError;
       }
     } else {
-      await sendTransactionWithRetry(
+      const result = await sendTransactionWithRetry(
         connection,
         wallet,
         instructionBatch[0],
         signerBatch[0],
         'single',
       );
+      if (onProgress) {
+        onProgress(0, result.txid ?? '');
+      }
     }
   }
 }
@@ -243,8 +260,12 @@ export const claimSpecificBid = async (
   wallet: WalletSigner,
   auctionView: AuctionView,
   bid: ParsedAccount<BidderPot>,
+  {
+    onProgress,
+    onFailure,
+  }: { onProgress?: ProgressCb; onFailure?: FailureCb } = {},
 ) => {
-  await SmartInstructionSender.build(wallet, connection)
+  const sender = SmartInstructionSender.build(wallet, connection)
     .config({
       abortOnFailure: true,
       maxSigningAttempts: 3,
@@ -263,11 +284,14 @@ export const claimSpecificBid = async (
         ],
         signers: [],
       },
-    ])
-    .onFailure(err => {
-      throw err;
-    })
-    .send();
+    ]);
+  if (onProgress) {
+    sender.onProgress(onProgress);
+  }
+  if (onFailure) {
+    sender.onFailure(onFailure);
+  }
+  await sender.send();
 };
 
 async function claimAllBids(
