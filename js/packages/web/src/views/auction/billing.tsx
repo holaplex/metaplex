@@ -33,6 +33,7 @@ import {
   METAPLEX_ID,
   processMetaplexAccounts,
   subscribeProgramChanges,
+  AuctionState,
 } from '@oyster/common';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useMeta } from '../../contexts';
@@ -603,57 +604,59 @@ export const InnerBillingView = ({
             />
           </Col>
         </Row>
-        <Row>
-          <Col span={24}>
-            <Table
-              loading={{
-                spinning: loading,
-                indicator: <LoadingOutlined />,
-              }}
-              columns={[
-                {
-                  title: 'Bidder',
-                  dataIndex: 'bidder',
-                  key: 'bidder',
-                },
-                {
-                  title: 'Bidder pot key',
-                  dataIndex: 'bidToClaim',
-                  key: 'bidToClaim',
-                },
-                {
-                  title: 'Action',
-                  dataIndex: 'action',
-                  key: 'action',
-                  render: (pot: ParsedAccount<BidderPot>) => (
-                    <Button
-                      type="primary"
-                      size="large"
-                      className="action-btn"
-                      disabled={pot.info.emptied}
-                      onClick={async () => {
-                        await claimSpecificBid(
-                          connection,
-                          wallet,
-                          auctionView,
-                          pot,
-                        );
-                      }}
-                    >
-                      SETTLE
-                    </Button>
-                  ),
-                },
-              ]}
-              dataSource={bidsToClaim.map(b => ({
-                key: b.metadata.info.bidderPubkey,
-                bidder: b.metadata.info.bidderPubkey,
-                bidToClaim: b.pot.pubkey,
-                action: b.pot,
-              }))}
-            />
-          </Col>
-        </Row>
+        {auctionView.auction.info.state === AuctionState.Ended ? null : (
+          <Row>
+            <Col span={24}>
+              <Table
+                loading={{
+                  spinning: loading,
+                  indicator: <LoadingOutlined />,
+                }}
+                columns={[
+                  {
+                    title: 'Bidder',
+                    dataIndex: 'bidder',
+                    key: 'bidder',
+                  },
+                  {
+                    title: 'Bidder pot key',
+                    dataIndex: 'bidToClaim',
+                    key: 'bidToClaim',
+                  },
+                  {
+                    title: 'Action',
+                    dataIndex: 'action',
+                    key: 'action',
+                    render: (pot: ParsedAccount<BidderPot>) => (
+                      <Button
+                        type="primary"
+                        size="large"
+                        className="action-btn"
+                        disabled={pot.info.emptied}
+                        onClick={async () => {
+                          await claimSpecificBid(
+                            connection,
+                            wallet,
+                            auctionView,
+                            pot,
+                          );
+                        }}
+                      >
+                        SETTLE
+                      </Button>
+                    ),
+                  },
+                ]}
+                dataSource={bidsToClaim.map(b => ({
+                  key: b.metadata.info.bidderPubkey,
+                  bidder: b.metadata.info.bidderPubkey,
+                  bidToClaim: b.pot.pubkey,
+                  action: b.pot,
+                }))}
+              />
+            </Col>
+          </Row>
+        )}
       </Col>
     </Content>
   );
