@@ -26,12 +26,13 @@ interface CustomEventDimensions {
 }
 
 type EventAttributes = {
-  event_category: 'Listings' | 'Minter';
+  event_category?: 'Listings' | 'Minter';
   event_label?: string;
   value?: number;
   sol_value?: number;
   listingType?: 'auction' | 'instant_sale';
   nftAddress?: string;
+  page_path?: string;
   //   [key: string]: string | number | boolean | any[] | null | undefined;
 } & Partial<CustomEventDimensions>;
 
