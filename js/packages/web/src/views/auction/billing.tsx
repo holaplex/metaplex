@@ -419,6 +419,7 @@ export function useBillingInfo({ auctionView }: { auctionView: AuctionView }) {
 
   return {
     bidsToClaim,
+    otherBidsToClaim,
     totalWinnerPayments,
     payoutTickets,
     participationEligible,
@@ -467,6 +468,7 @@ export const InnerBillingView = ({
 
   const {
     bidsToClaim,
+    otherBidsToClaim,
     totalWinnerPayments,
     payoutTickets,
     participationPossibleTotal,
