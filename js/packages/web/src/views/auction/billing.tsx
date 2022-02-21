@@ -398,6 +398,14 @@ export function useBillingInfo({ auctionView }: { auctionView: AuctionView }) {
     p => !p.info.emptied,
   );
 
+  const otherBidsToClaim = [
+    ...Object.values(winnerPotsByBidderKey).map(pot => ({
+      metadata:
+        bidderMetadataByAuctionAndBidder[`${auctionKey}-${pot.info.bidderAct}`],
+      pot,
+    })),
+  ];
+
   const bidsToClaim: {
     metadata: ParsedAccount<BidderMetadata>;
     pot: ParsedAccount<BidderPot>;
@@ -790,7 +798,7 @@ export const InnerBillingView = ({
                       ),
                     },
                   ]}
-                  dataSource={bidsToClaim.map(b => ({
+                  dataSource={otherBidsToClaim.map(b => ({
                     key: b.metadata.info.bidderPubkey,
                     bidder: b.metadata.info.bidderPubkey,
                     bidToClaim: b.pot.pubkey,
