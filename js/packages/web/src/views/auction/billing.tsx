@@ -761,7 +761,6 @@ export const InnerBillingView = ({
                           type="primary"
                           size="large"
                           className="action-btn"
-                          disabled={pot.info.emptied}
                           onClick={async () => {
                             notify({
                               type: 'info',
