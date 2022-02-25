@@ -233,11 +233,9 @@ function useAuctionExtended(
 export const AuctionCard = ({
   auctionView,
   hideDefaultAction,
-  action,
 }: {
   auctionView: AuctionView;
   hideDefaultAction?: boolean;
-  action?: JSX.Element;
 }) => {
   const { storefront } = useStore();
   const connection = useConnection();
@@ -609,121 +607,118 @@ export const AuctionCard = ({
     return <></>;
   }
 
-  // Show the refund/reclaim/redeem bid button
-  const showRedeemReclaimRefundBtn =
-    showPlaceBidUI &&
-    !hideDefaultAction &&
-    wallet.connected &&
-    !auctionView.myBidderMetadata?.info.cancelled &&
-    auctionView.auction.info.ended();
+  const disableRedeemReclaimRefundBtn =
+    !myPayingAccount ||
+    (!auctionView.myBidderMetadata &&
+      isAuctionManagerAuthorityNotWalletOwner) ||
+    loading ||
+    !!auctionView.items.find(i => i.find(it => !it.metadata));
 
   // Refund, reclaim, or redeem a bid
-  const redeemReclaimRefundBtn = (
-    <Button
-      className="metaplex-fullwidth"
-      type="primary"
-      size="large"
-      block
-      disabled={
-        !myPayingAccount ||
-        (!auctionView.myBidderMetadata &&
-          isAuctionManagerAuthorityNotWalletOwner) ||
-        loading ||
-        !!auctionView.items.find(i => i.find(it => !it.metadata))
-      }
-      onClick={async () => {
-        setLoading(true);
-        if (
-          wallet?.publicKey?.toBase58() === auctionView.auctionManager.authority
-        ) {
-          const totalCost = await calculateTotalCostOfRedeemingOtherPeoplesBids(
-            connection,
-            auctionView,
-            bids,
-            bidRedemptions,
-          );
-          setPrintingCost(totalCost);
-          setShowWarningModal(true);
-        }
-        try {
-          if (eligibleForAnything) {
-            try {
-              await sendRedeemBid(
+  const RedeemReclaimRefundBtn = (
+    <div className="p-4">
+      <Button
+        className="metaplex-fullwidth"
+        type="primary"
+        size="large"
+        block
+        disabled={disableRedeemReclaimRefundBtn}
+        onClick={async () => {
+          setLoading(true);
+          if (
+            wallet?.publicKey?.toBase58() ===
+            auctionView.auctionManager.authority
+          ) {
+            const totalCost =
+              await calculateTotalCostOfRedeemingOtherPeoplesBids(
                 connection,
-                wallet,
-                myPayingAccount.pubkey,
                 auctionView,
-                accountByMint,
-                prizeTrackingTickets,
-                bidRedemptions,
-                bids,
-              );
-
-              notification.success({
-                message: 'Bid Redeemed',
-                duration: 30,
-                description: (
-                  <Space direction="vertical">
-                    <Text>
-                      Congratulations, your bid was redeemed for the NFT! See it
-                      in your owned tab.
-                    </Text>
-                    <Button type="primary">View Owned</Button>
-                  </Space>
-                ),
-                onClick: () => {
-                  navigate('/owned');
-                },
-              });
-            } catch (e: any) {
-              Bugsnag.notify(e);
-              notification.error({
-                message: 'Bid Redemption Error',
-                duration: 20,
-                description:
-                  'There was an error redeeming your bid. Please try again or reach out to support.',
-              });
-            }
-          } else {
-            try {
-              await sendCancelBid(
-                connection,
-                wallet,
-                myPayingAccount.pubkey,
-                auctionView,
-                accountByMint,
                 bids,
                 bidRedemptions,
-                prizeTrackingTickets,
               );
-
-              const message =
-                cancelBidMessages[isAuctioneer ? 'redeemed' : 'refunded'];
-
-              notification.success(message);
-            } catch (e: any) {
-              notification.error({
-                message: 'Bid Refund Error',
-                description:
-                  'There was an error refunding your bid. Please try again or reach out to support.',
-              });
-            }
+            setPrintingCost(totalCost);
+            setShowWarningModal(true);
           }
-        } finally {
-          setLoading(false);
-        }
-      }}
-    >
-      {loading ||
-      auctionView.items.find(i => i.find(it => !it.metadata)) ||
-      !myPayingAccount ? (
-        <Spin indicator={<LoadingOutlined />} />
-      ) : eligibleForAnything ? (
-        `Claim NFT`
-      ) : (
-        `${isAuctioneer ? 'Reclaim Items' : 'Refund bid'}`
-      )}
-    </Button>
+          try {
+            if (eligibleForAnything) {
+              try {
+                await sendRedeemBid(
+                  connection,
+                  wallet,
+                  myPayingAccount.pubkey,
+                  auctionView,
+                  accountByMint,
+                  prizeTrackingTickets,
+                  bidRedemptions,
+                  bids,
+                );
+
+                notification.success({
+                  message: 'Bid Redeemed',
+                  duration: 30,
+                  description: (
+                    <Space direction="vertical">
+                      <Text>
+                        Congratulations, your bid was redeemed for the NFT! See
+                        it in your owned tab.
+                      </Text>
+                      <Button type="primary">View Owned</Button>
+                    </Space>
+                  ),
+                  onClick: () => {
+                    navigate('/owned');
+                  },
+                });
+              } catch (e: any) {
+                Bugsnag.notify(e);
+                notification.error({
+                  message: 'Bid Redemption Error',
+                  duration: 20,
+                  description:
+                    'There was an error redeeming your bid. Please try again or reach out to support.',
+                });
+              }
+            } else {
+              try {
+                await sendCancelBid(
+                  connection,
+                  wallet,
+                  myPayingAccount.pubkey,
+                  auctionView,
+                  accountByMint,
+                  bids,
+                  bidRedemptions,
+                  prizeTrackingTickets,
+                );
+
+                const message =
+                  cancelBidMessages[isAuctioneer ? 'redeemed' : 'refunded'];
+
+                notification.success(message);
+              } catch (e: any) {
+                notification.error({
+                  message: 'Bid Refund Error',
+                  description:
+                    'There was an error refunding your bid. Please try again or reach out to support.',
+                });
+              }
+            }
+          } finally {
+            setLoading(false);
+          }
+        }}
+      >
+        {loading ||
+        auctionView.items.find(i => i.find(it => !it.metadata)) ||
+        !myPayingAccount ? (
+          <Spin indicator={<LoadingOutlined />} />
+        ) : eligibleForAnything ? (
+          `Claim NFT`
+        ) : (
+          `${isAuctioneer ? 'Reclaim Items' : 'Refund bid'}`
+        )}
+      </Button>
+    </div>
   );
 
   // If the user is currently capable of acting on a live (or unstarted) listing
@@ -746,9 +741,9 @@ export const AuctionCard = ({
     !auctionView.auction.info.ended();
 
   // Start the auction
-  const startAuctionBtn = (
+  const StartAuctionBtn = (
     <Button
-      className="metaplex-fullwidth"
+      className="metaplex-fullwidth p-4"
       type="primary"
       size="large"
       loading={loading}
@@ -771,9 +766,9 @@ export const AuctionCard = ({
   );
 
   // Show the place-bid UI
-  const placeBidBtn = (
+  const PlaceBidBtn = (
     <Button
-      className="metaplex-fullwidth"
+      className="metaplex-fullwidth p-4"
       type="primary"
       size="large"
       onClick={() => {
@@ -786,9 +781,9 @@ export const AuctionCard = ({
   );
 
   // Conduct an instant sale
-  const instantSaleBtn = (
+  const InstantSaleBtn = (
     <Button
-      className="metaplex-fullwidth"
+      className="metaplex-fullwidth p-4"
       type="primary"
       size="large"
       block
@@ -818,9 +813,9 @@ export const AuctionCard = ({
   );
 
   // Components for inputting bid amount and placing a bid
-  const placeBidUI = (
+  const PlaceBidUI = (
     <Space
-      className="metaplex-fullwidth metaplex-space-align-stretch"
+      className="metaplex-fullwidth metaplex-space-align-stretch p-4"
       direction="vertical"
     >
       <h5>{`Bid ${minNextBid} SOL or more`}</h5>
@@ -944,6 +939,35 @@ export const AuctionCard = ({
 
   const someoneWon = auctionEnded && bids.length;
 
+  const showHowAuctionsWorkBtn = !showPlaceBidUI && !auctionView.isInstantSale;
+
+  const actuallyShowStartAuctionBtn =
+    showDefaultNonEndedAction && showStartAuctionBtn;
+
+  const showInstantSaleButton =
+    showDefaultNonEndedAction &&
+    !showStartAuctionBtn &&
+    auctionView.isInstantSale;
+
+  const actuallyShowPlaceBidUI =
+    showDefaultNonEndedAction && showPlaceBidUI && !auctionView.isInstantSale;
+
+  const showPlaceBidButton =
+    !showPlaceBidUI && showStartOrPlaceBidBtns && !showStartAuctionBtn;
+
+  const showConnectToBidBtn = !hideDefaultAction && !wallet.connected;
+
+  // Show the refund/reclaim/redeem bid button
+  const showRedeemReclaimRefundBtn =
+    showPlaceBidUI &&
+    !hideDefaultAction &&
+    wallet.connected &&
+    auctionView.auction.info.ended() &&
+    !auctionView.myBidderMetadata?.info.cancelled &&
+    !isBidderPotEmpty;
+
+  const duringAuctionNotConnected = !auctionEnded && !wallet.connected;
+
   return (
     <div>
       <Card
@@ -1017,47 +1041,28 @@ export const AuctionCard = ({
           </div>
         }
       >
-        {someoneWon &&
-          mint &&
-          winners.map(bid => (
-            <WinnerProfile
-              bidderPubkey={bid.info.bidderPubkey}
-              key={bid.info.bidderPubkey}
-            />
-          ))}
-        {/* ugly, but it figures out wether to show the space or not by mirroring the conditions below */}
-        {(!showPlaceBidUI ||
-          showDefaultNonEndedAction ||
-          (showDefaultNonEndedAction &&
-            showPlaceBidUI &&
-            !auctionView.isInstantSale) ||
-          (showDefaultNonEndedAction && showStartAuctionBtn) ||
-          (!hideDefaultAction && !wallet.connected) ||
-          showRedeemReclaimRefundBtn) && (
-          <Space
-            className="metaplex-fullwidth metaplex-space-align-stretch "
-            direction="vertical"
-          >
-            {!showPlaceBidUI && (
-              <div className="space-y-4">
-                {!auctionView.isInstantSale && (
-                  <HowAuctionsWorkModal buttonBlock buttonSize="large" />
-                )}
-                {showStartOrPlaceBidBtns && (
-                  <>{showStartAuctionBtn ? startAuctionBtn : placeBidBtn}</>
-                )}
-              </div>
-            )}
+        {/* After auction (comes first because winner list is on top) */}
+        {someoneWon && mint
+          ? winners.map(bid => (
+              <WinnerProfile
+                bidderPubkey={bid.info.bidderPubkey}
+                key={bid.info.bidderPubkey}
+              />
+            ))
+          : null}
 
-            {showDefaultNonEndedAction &&
-              showPlaceBidUI &&
-              !auctionView.isInstantSale &&
-              placeBidUI}
-            {showDefaultNonEndedAction &&
-              (showStartAuctionBtn
-                ? startAuctionBtn
-                : auctionView.isInstantSale && instantSaleBtn)}
-            {!hideDefaultAction && !wallet.connected && (
+        {showRedeemReclaimRefundBtn && RedeemReclaimRefundBtn}
+
+        {/* before auction */}
+        {actuallyShowStartAuctionBtn && StartAuctionBtn}
+
+        {/* During auction, not connected */}
+        {duringAuctionNotConnected && (
+          <>
+            {showHowAuctionsWorkBtn && !auctionView.isInstantSale && (
+              <HowAuctionsWorkModal buttonBlock buttonSize="large" />
+            )}
+            {showConnectToBidBtn && (
               <Button
                 className="metaplex-fullwidth metaplex-margin-top-4 metaplex-round-corners"
                 type="primary"
@@ -1076,7 +1081,13 @@ export const AuctionCard = ({
             {showRedeemReclaimRefundBtn && redeemReclaimRefundBtn}
             {action}
           </Space>
+          </>
         )}
+
+        {/*  During auction, connected */}
+        {showInstantSaleButton && InstantSaleBtn}
+        {showPlaceBidButton && PlaceBidBtn}
+        {actuallyShowPlaceBidUI && PlaceBidUI}
       </Card>
 
       <MetaplexModal
@@ -1112,18 +1123,18 @@ const WinnerProfile = ({
   return (
     <a href={`https://www.holaplex.com/profiles/${bidderPubkey}`}>
       <div className="flex items-center px-4 py-4 sm:px-6 cursor-pointer rounded-lg  group">
-        <div className="min-w-0 flex-1 flex items-center">
+        <div className="min-w-0 flex-1 flex items-center transition-colors">
           <div className="flex-shrink-0 pr-4">
             <Identicon size={48} address={bidderPubkey} />
           </div>
-          <div className="min-w-0 flex-1 flex justify-between group-hover:text-primary">
-            <div>
-              <p className="text-base font-medium  truncate flex items-center">
+          <div className="min-w-0 flex-1 flex justify-between group-hover:text-primary text-color-text">
+            <div className="text-color-text">
+              <p className=" font-medium  truncate flex items-center  group-hover:text-primary text-color-text">
                 {bidderTwitterHandle || shortenAddress(bidderPubkey)}
               </p>
             </div>
           </div>
-          <div className="flex items-center group-hover:text-primary">
+          <div className="flex items-center group-hover:text-primary text-color-text">
             <span className="block">View profile</span>
             <ChevronRightIcon
               className="h-5 w-5"

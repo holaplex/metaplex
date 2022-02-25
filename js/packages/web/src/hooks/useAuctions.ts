@@ -149,7 +149,9 @@ export function useCachedRedemptionKeysByWallet() {
   return cachedRedemptionKeys;
 }
 
-export const useGroupedAuctions = () => {
+export const useGroupedAuctions = (options: {
+  showAllEndedListings: boolean;
+}) => {
   const [fetching, setFetching] = useState(true);
   const [groups, SetListingGroups] = useState<ListingsGroups>({
     live: [],
@@ -228,7 +230,11 @@ export const useGroupedAuctions = () => {
           .filter(isActiveSale(false))
           .sort(sortByEndingSoon),
         ended: initializedAuctions
-          .filter(a => a.info.state === 2)
+          .filter(
+            a =>
+              a.info.state === 2 &&
+              (options.showAllEndedListings || a.info.lastBid),
+          )
           .sort(sortByRecentlyEnded),
         resale: initializedAuctions
           .filter(isActiveSale(true))
@@ -238,7 +244,7 @@ export const useGroupedAuctions = () => {
       SetListingGroups(groups);
       setFetching(false);
     })();
-  }, [isLoading]);
+  }, [isLoading, options.showAllEndedListings]);
 
   return {
     groups,
@@ -258,7 +264,7 @@ export const useInfiniteScrollAuctions = (
 
   useEffect(() => {
     setAuctionViews([]);
-  }, [view]);
+  }, [view, listings.length]);
 
   const {
     auctionManagersByAuction,
