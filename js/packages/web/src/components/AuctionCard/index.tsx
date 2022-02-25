@@ -21,6 +21,7 @@ import {
   shortenAddress,
   useConnection,
   useMint,
+  useStore,
   useUserAccounts,
   useWalletModal,
   WinningConfigType,
@@ -74,6 +75,7 @@ import { HowAuctionsWorkModal } from '../HowAuctionsWorkModal';
 import { endSale } from './utils/endSale';
 import { DateTime } from 'luxon';
 import { ChevronRightIcon } from '@heroicons/react/solid';
+import { CrossMintButton } from '@crossmint/client-sdk-react-ui';
 
 const { Text } = Typography;
 
@@ -237,6 +239,7 @@ export const AuctionCard = ({
   hideDefaultAction?: boolean;
   action?: JSX.Element;
 }) => {
+  const { storefront } = useStore();
   const connection = useConnection();
   const { patchState } = useMeta();
 
@@ -802,6 +805,18 @@ export const AuctionCard = ({
     </Button>
   );
 
+  // Crossmint credit card checkout
+  const crossmintBtn = (
+    <CrossMintButton
+      listingId={auctionView.auction.pubkey}
+      collectionDescription={storefront.meta.description}
+      collectionTitle={storefront.meta.title}
+      collectionPhoto={storefront.theme.logo}
+      // todo -- rmv inline styles once this component is testable.
+      style={{ width: '100%', height: '40px', borderRadius: '2px' }}
+    />
+  );
+
   // Components for inputting bid amount and placing a bid
   const placeBidUI = (
     <Space
@@ -1053,6 +1068,10 @@ export const AuctionCard = ({
                 {auctionView.isInstantSale ? 'purchase' : 'place bid'}
               </Button>
             )}
+
+            {auctionView.isInstantSale &&
+              storefront.integrations?.crossmintClientId &&
+              crossmintBtn}
 
             {showRedeemReclaimRefundBtn && redeemReclaimRefundBtn}
             {action}
