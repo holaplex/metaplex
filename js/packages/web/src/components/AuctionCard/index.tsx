@@ -1078,6 +1078,14 @@ export const AuctionCard = ({
                 }
               </>
             )}
+
+            {auctionView.isInstantSale &&
+              storefront.integrations?.crossmintClientId &&
+              crossmintBtn}
+
+            {showRedeemReclaimRefundBtn && redeemReclaimRefundBtn}
+            {action}
+          </Space>
           </>
         )}
 
