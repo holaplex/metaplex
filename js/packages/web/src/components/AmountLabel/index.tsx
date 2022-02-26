@@ -32,7 +32,7 @@ export const AmountLabel = (props: IAmountLabel) => {
           <Statistic
             className="sol-price"
             value={amount.toLocaleString()}
-            prefix={customPrefix || <SolCircle />}
+            prefix={process.env.QUOTE}
           />
         )}
         {displayUSD && <span className="metaplex-opacity-5">|</span>}

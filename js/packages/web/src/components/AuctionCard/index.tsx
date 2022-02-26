@@ -246,7 +246,7 @@ export const AuctionCard = ({
   );
   const navigate = useNavigate();
 
-  const mintInfo = useMint(auctionView.auction.info.tokenMint);
+  const mintInfo = useMint(QUOTE_MINT);
   const { prizeTrackingTickets, bidRedemptions } = useMeta();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -263,7 +263,7 @@ export const AuctionCard = ({
 
   const { accountByMint } = useUserAccounts();
 
-  const mintKey = auctionView.auction.info.tokenMint;
+  const mintKey = QUOTE_MINT.toBase58();
   const balance = useUserBalance(mintKey);
 
   const walletPublickKey = wallet?.publicKey?.toBase58();

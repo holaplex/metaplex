@@ -8,6 +8,7 @@ import { AuctionCategory, AuctionState } from '.';
 import { ArtCard } from '../../components/ArtCard';
 import { useUserBalance } from '../../hooks';
 import { AddFundsModal } from '../../components/CurrentUserBadge';
+import { QUOTE_MINT } from '../../constants';
 
 export const ReviewStep = (props: {
   confirm: () => void;
@@ -17,7 +18,7 @@ export const ReviewStep = (props: {
 }) => {
   const wallet = useWallet();
   const [isShowingModal, setIsShowingModal] = useState(false);
-  const { balance } = useUserBalance(WRAPPED_SOL_MINT.toString());
+  const { balance } = useUserBalance(QUOTE_MINT.toString());
   const item = props.attributes.items?.[0];
 
   return (

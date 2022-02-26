@@ -132,7 +132,7 @@ export const InstantSaleStep = ({
           autoFocus
           placeholder="Price"
           prefix="◎"
-          suffix="SOL"
+          suffix={process.env.QUOTE}
           onChange={info =>
             setAttributes({
               ...attributes,

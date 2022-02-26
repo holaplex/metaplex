@@ -1,3 +1,4 @@
+import { QUOTE_MINT } from '../../constants';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Row, Col, Layout, Spin, Button, Table, Typography, Space } from 'antd';
@@ -422,7 +423,7 @@ export const InnerBillingView = ({
   const id = auctionView.thumbnail.metadata.pubkey;
   const art = useArt(id);
   const [settleErrorMessage, setSettleErrorMessage] = useState<string>();
-  const balance = useUserBalance(auctionView.auction.info.tokenMint);
+  const balance = useUserBalance(QUOTE_MINT.toBase58());
   const [escrowBalance, setEscrowBalance] = useState<number | undefined>();
   const { whitelistedCreatorsByCreator } = useMeta();
   const [escrowBalanceRefreshCounter, setEscrowBalanceRefreshCounter] =

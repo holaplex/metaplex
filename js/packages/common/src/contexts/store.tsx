@@ -15,6 +15,8 @@ export interface StorefrontMeta {
   title: string;
   description: string;
   favicon: string;
+  mint: string;
+  mintname: string;
 }
 
 export interface StorefrontTheme {
