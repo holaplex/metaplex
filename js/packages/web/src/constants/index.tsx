@@ -4,18 +4,17 @@ import { PublicKey } from '@solana/web3.js';
 export * from './labels';
 export * from './style';
 
-let qm = WRAPPED_SOL_MINT;
 
-try { 
-    // @ts-ignore
-    qm = new PublicKey(process.env.QUOTE_MINT)
-}
-catch (err){
+export let QUOTE_MINT = WRAPPED_SOL_MINT;
 
+export const set_QUOTE_MINT = function(new_qm: PublicKey){
+    QUOTE_MINT = new_qm;
 }
 
-export let QUOTE_MINT = qm;
 
-export const set_QUOTE_MINT = function(lala: PublicKey){
-    QUOTE_MINT = lala;
+export let QUOTE_MINT_NAME = "WSOL";
+
+export const set_QUOTE_MINT_NAME = function(new_qmn: string){
+    QUOTE_MINT_NAME = new_qmn;
+    
 }
