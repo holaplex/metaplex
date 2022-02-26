@@ -45,7 +45,7 @@ export interface PublicKeyStringAndAccount<T> {
   account: AccountInfo<T>;
 }
 
-export const WRAPPED_SOL_MINT = new PublicKey(
+export let WRAPPED_SOL_MINT = new PublicKey(
   'So11111111111111111111111111111111111111112',
 );
 

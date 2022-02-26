@@ -222,7 +222,7 @@ export async function sendRedeemBid(
         auctionView.myBidderMetadata.info.bidderPubkey,
         auctionView.myBidderPot?.info.bidderPot,
         auctionView.vault.pubkey,
-        auctionView.auction.info.tokenMint,
+        QUOTE_MINT.toBase58(),
         claimInstructions,
       );
     }
@@ -819,7 +819,7 @@ export async function setupRedeemParticipationInstructions(
         ? fixedPrice.toNumber()
         : bid?.info.lastBid.toNumber() || 0;
 
-    let tokenAccount = accountsByMint.get(auctionView.auction.info.tokenMint);
+    let tokenAccount = accountsByMint.get(QUOTE_MINT.toBase58());
 
     console.log('Have token account', tokenAccount);
     if (!tokenAccount) {
@@ -946,8 +946,8 @@ async function deprecatedSetupRedeemParticipationInstructions(
     return;
 
   const updateAuth = item.metadata.info.updateAuthority;
-  const tokenAccount = accountsByMint.get(auctionView.auction.info.tokenMint);
-  const mint = cache.get(auctionView.auction.info.tokenMint);
+  const tokenAccount = accountsByMint.get(QUOTE_MINT.toBase58());
+  const mint = cache.get(QUOTE_MINT.toBase58());
 
   const participationBalance = await connection.getTokenAccountBalance(
     toPublicKey(participationState.printingAuthorizationTokenAccount),

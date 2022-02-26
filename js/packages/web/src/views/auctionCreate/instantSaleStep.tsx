@@ -5,6 +5,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { AuctionState, InstantSaleType } from '.';
 import { SafetyDepositDraft } from '../../actions/createAuctionManager';
 import { ArtSelector } from './artSelector';
+import { QUOTE_MINT_NAME } from '../../constants';
 
 const { Option } = Select;
 
@@ -132,7 +133,7 @@ export const InstantSaleStep = ({
           autoFocus
           placeholder="Price"
           prefix="◎"
-          suffix="SOL"
+          suffix={QUOTE_MINT_NAME}
           onChange={info =>
             setAttributes({
               ...attributes,

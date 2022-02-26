@@ -3,6 +3,7 @@ import { Statistic } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useSolPrice } from '../../contexts';
 import { SolCircle } from '../Custom';
+import { QUOTE_MINT_NAME } from '../../constants';
 
 interface IAmountLabel {
   amount: number;
@@ -32,7 +33,7 @@ export const AmountLabel = (props: IAmountLabel) => {
           <Statistic
             className="sol-price"
             value={amount.toLocaleString()}
-            prefix={customPrefix || <SolCircle />}
+            prefix={QUOTE_MINT_NAME}
           />
         )}
         {displayUSD && <span className="metaplex-opacity-5">|</span>}
