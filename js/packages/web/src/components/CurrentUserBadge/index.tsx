@@ -158,7 +158,7 @@ export const CurrentUserBadge = (props: {
                 <h5>BALANCE</h5>
                 <Space direction="horizontal">
                   <SolCircle />
-                  <span>{formatNumber.format(balance)} SOL</span>
+                  <span>{formatNumber.format(balance)}</span>
                   <span>{formatUSD.format(balanceInUSD)}</span>
                 </Space>
                 <Space direction="horizontal">
