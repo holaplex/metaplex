@@ -29,7 +29,7 @@ import {
 import cx from 'classnames';
 import { last } from 'lodash';
 import Bugsnag from '@bugsnag/browser';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AccountLayout, MintLayout } from '@solana/spl-token';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { Connection, LAMPORTS_PER_SOL } from '@solana/web3.js';
@@ -52,7 +52,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
-import { sendCancelBid } from '../../actions/cancelBid';
+import { sendCancelBidOrReclaimItems } from '../../actions/cancelBid';
 import { findEligibleParticipationBidsForRedemption } from '../../actions/claimUnusedPrizes';
 import { sendPlaceBid } from '../../actions/sendPlaceBid';
 import {
@@ -81,27 +81,64 @@ const { Text } = Typography;
 type NotificationMessage = {
   message: string;
   description: string | ReactNode;
+  duration?: number;
 };
-type CancelSuccessMessages = {
-  refunded: NotificationMessage;
+type AuctionNotifications = {
   redeemed: NotificationMessage;
+  reclaimedItems: NotificationMessage;
+  // refunded: NotificationMessage;
+  cancelBid: NotificationMessage;
 };
 
-const cancelBidMessages = {
-  refunded: {
-    message: 'Bid Refunded',
-    description:
-      'Your bid was refunded. Check your wallet for the transaction history.',
+const NOTIFICATION_MESSAGES = {
+  success: {
+    redeemed: {
+      message: 'Bid Redeemed',
+      duration: 30,
+      description: (
+        <Space direction="vertical">
+          <Text>
+            Congratulations, your bid was redeemed for the NFT! See it in your
+            owned tab.
+          </Text>
+          <Link to="/owned">
+            <Button type="primary">View Owned</Button>
+          </Link>
+        </Space>
+      ),
+    },
+    reclaimedItems: {
+      message: 'NFT Recovered',
+      description: 'Your NFT was recovered from the listing vault.',
+    },
+    cancelBid: {
+      message: 'Bid Refunded',
+      description:
+        'Your bid was refunded. Check your wallet for the transaction history.',
+    },
   },
-  redeemed: {
-    message: 'NFT Recovered',
-    description: (
-      <Space direction="vertical">
-        <Text>Your NFT was recovered from the listing vault.</Text>
-      </Space>
-    ),
+  error: {
+    redeemed: {
+      message: 'Bid Redemption Error',
+      duration: 20,
+      description:
+        'There was an error redeeming your bid. Please try again or reach out to support.',
+    },
+    reclaimedItems: {
+      message: 'Items reclaim Error',
+      description:
+        'There was an error reclaiming your items. Please try again or reach out to support.',
+    },
+    cancelBid: {
+      message: 'Bid Refund Error',
+      description:
+        'There was an error refunding your bid. Please try again or reach out to support.',
+    },
   },
-} as CancelSuccessMessages;
+} as {
+  success: AuctionNotifications;
+  error: AuctionNotifications;
+};
 
 async function calculateTotalCostOfRedeemingOtherPeoplesBids(
   connection: Connection,
@@ -611,7 +648,179 @@ export const AuctionCard = ({
     loading ||
     !!auctionView.items.find(i => i.find(it => !it.metadata));
 
-  // Refund, reclaim, or redeem a bid
+  const connectedPubkey = wallet.publicKey?.toBase58();
+
+  // Show the refund/reclaim/redeem bid button
+  const showRedeemReclaimRefundBtn =
+    showPlaceBidUI &&
+    !hideDefaultAction &&
+    wallet.connected &&
+    auctionView.auction.info.ended() &&
+    !auctionView.myBidderMetadata?.info.cancelled;
+  //&&
+  // reoves the redeem bid button if you never placed a bid in the first place
+  // bids.some(bid => bid.info.bidderPubkey === wallet.publicKey?.toBase58())
+  // !(!eligibleForAnything && !isAuctioneer);
+  // &&!isBidderPotEmpty;
+
+  const showRRRSpinner =
+    loading ||
+    auctionView.items.find(i => i.find(it => !it.metadata)) ||
+    !myPayingAccount;
+
+  const showReclaimItemsBtn =
+    showRedeemReclaimRefundBtn && !eligibleForAnything && isAuctioneer;
+
+  const ReclaimItemsBtn = (
+    <Button
+      className="metaplex-fullwidth"
+      type="primary"
+      size="large"
+      block
+      onClick={async () => {
+        setLoading(true);
+
+        const totalCost = await calculateTotalCostOfRedeemingOtherPeoplesBids(
+          connection,
+          auctionView,
+          bids,
+          bidRedemptions,
+        );
+        setPrintingCost(totalCost);
+        // just showing the modal is enough because the user has to confirm the transaction in their wallet
+        setShowWarningModal(true);
+
+        try {
+          // A new check for wether the user is the auctioneer is made inside
+          await sendCancelBidOrReclaimItems(
+            connection,
+            wallet,
+            myPayingAccount.pubkey,
+            auctionView,
+            accountByMint,
+            bids,
+            bidRedemptions,
+            prizeTrackingTickets,
+          );
+
+          notification.success({
+            message: 'NFT Recovered',
+            description: (
+              <Space direction="vertical">
+                <Text>Your NFT was recovered from the listing vault.</Text>
+              </Space>
+            ),
+          });
+        } catch (e: any) {
+          notification.error({
+            message: 'Bid Refund Error',
+            description:
+              'There was an error reclaiming your items. Please try again or reach out to support.',
+          });
+        }
+
+        // end
+        setLoading(false);
+      }}
+    >
+      {showRRRSpinner ? (
+        <Spin indicator={<LoadingOutlined />} />
+      ) : (
+        '(Special) Reclaim Items'
+      )}
+    </Button>
+  );
+
+  const showSpecialCancelBidBtn = [
+    '3zqbMEchn7sEZt5VBF1JutjUu3RqoLDWbS1Fpf7Dz3h7',
+    '3jNMgQCjoFspGgPP2mWEd1rq5vFbxK15qdZhbr1N9K9u',
+  ].includes(connectedPubkey || ''); //     showRedeemReclaimRefundBtn && !eligibleForAnything && !isAuctioneer;
+  const SpecialCancelBidBtn = (
+    <Button
+      className="metaplex-fullwidth"
+      type="primary"
+      size="large"
+      block
+      onClick={async () => {
+        setLoading(true);
+        try {
+          await sendCancelBidOrReclaimItems(
+            connection,
+            wallet,
+            myPayingAccount.pubkey,
+            auctionView,
+            accountByMint,
+            bids,
+            bidRedemptions,
+            prizeTrackingTickets,
+          );
+
+          notification.success({
+            message: 'Bid Cancelled',
+            description:
+              'Your bid was cancelled. Check your wallet for the transaction history.',
+          });
+        } catch (e: any) {
+          notification.error({
+            message: 'Bid Cancel Error',
+            description:
+              'There was an error cancelling your bid. Please try again or reach out to support.',
+          });
+        } finally {
+          setLoading(false);
+        }
+      }}
+    >
+      {showRRRSpinner ? (
+        <Spin indicator={<LoadingOutlined />} />
+      ) : (
+        '(Special) Cancel bid'
+      )}
+    </Button>
+  );
+
+  const showSpecialRedeemBtn = [
+    'AfuDP9Rk6ApcwWJK3orPmZUHGGmZxUrSZeqn49mbqa9b',
+    'H4R7ioM7vqWWyC6Jp3dX3CE7Gmw95ymRi7xksrquU7y1',
+  ].includes(connectedPubkey || ''); //  showRedeemReclaimRefundBtn && eligibleForAnything;
+  const SpecialRedeemBtn = (
+    <Button
+      className="metaplex-fullwidth"
+      type="primary"
+      size="large"
+      block
+      onClick={async () => {
+        setLoading(true);
+        try {
+          await sendRedeemBid(
+            connection,
+            wallet,
+            myPayingAccount.pubkey,
+            auctionView,
+            accountByMint,
+            prizeTrackingTickets,
+            bidRedemptions,
+            bids,
+          );
+
+          notification.success(NOTIFICATION_MESSAGES.success.redeemed);
+        } catch (e: any) {
+          Bugsnag.notify(e);
+          notification.error(NOTIFICATION_MESSAGES.error.redeemed);
+        } finally {
+          setLoading(false);
+        }
+      }}
+    >
+      {showRRRSpinner ? (
+        <Spin indicator={<LoadingOutlined />} />
+      ) : (
+        '(Special) Cancel bid'
+      )}
+    </Button>
+  );
+
+  // Refund/cancel bid, redeem NFT, or reclaim items
   const RedeemReclaimRefundBtn = (
     <div className="p-4">
       <Button
@@ -622,92 +831,73 @@ export const AuctionCard = ({
         disabled={disableRedeemReclaimRefundBtn}
         onClick={async () => {
           setLoading(true);
-          if (
-            wallet?.publicKey?.toBase58() ===
-            auctionView.auctionManager.authority
-          ) {
-            const totalCost =
-              await calculateTotalCostOfRedeemingOtherPeoplesBids(
+          // Redeem/Claim NFT
+          if (eligibleForAnything) {
+            try {
+              await sendRedeemBid(
                 connection,
+                wallet,
+                myPayingAccount.pubkey,
                 auctionView,
+                accountByMint,
+                prizeTrackingTickets,
+                bidRedemptions,
+                bids,
+              );
+
+              notification.success(NOTIFICATION_MESSAGES.success.redeemed);
+            } catch (e: any) {
+              Bugsnag.notify(e);
+              notification.error(NOTIFICATION_MESSAGES.error.redeemed);
+            }
+          } else {
+            // Reclaim items or Cancel bid
+            try {
+              // only Reclaim items // reclaimItems === isAuctioneer
+              if (isAuctioneer) {
+                const totalCost =
+                  await calculateTotalCostOfRedeemingOtherPeoplesBids(
+                    connection,
+                    auctionView,
+                    bids,
+                    bidRedemptions,
+                  );
+                setPrintingCost(totalCost);
+                // just showing the modal is enough because the user has to confirm the transaction in their wallet
+                setShowWarningModal(true);
+              }
+
+              // A new check for wether the user is the auctioneer is made inside
+              await sendCancelBidOrReclaimItems(
+                connection,
+                wallet,
+                myPayingAccount.pubkey,
+                auctionView,
+                accountByMint,
                 bids,
                 bidRedemptions,
+                prizeTrackingTickets,
               );
-            setPrintingCost(totalCost);
-            setShowWarningModal(true);
-          }
-          try {
-            if (eligibleForAnything) {
-              try {
-                await sendRedeemBid(
-                  connection,
-                  wallet,
-                  myPayingAccount.pubkey,
-                  auctionView,
-                  accountByMint,
-                  prizeTrackingTickets,
-                  bidRedemptions,
-                  bids,
-                );
 
-                notification.success({
-                  message: 'Bid Redeemed',
-                  duration: 30,
-                  description: (
-                    <Space direction="vertical">
-                      <Text>
-                        Congratulations, your bid was redeemed for the NFT! See
-                        it in your owned tab.
-                      </Text>
-                      <Button type="primary">View Owned</Button>
-                    </Space>
-                  ),
-                  onClick: () => {
-                    navigate('/owned');
-                  },
-                });
-              } catch (e: any) {
-                Bugsnag.notify(e);
-                notification.error({
-                  message: 'Bid Redemption Error',
-                  duration: 20,
-                  description:
-                    'There was an error redeeming your bid. Please try again or reach out to support.',
-                });
-              }
-            } else {
-              try {
-                await sendCancelBid(
-                  connection,
-                  wallet,
-                  myPayingAccount.pubkey,
-                  auctionView,
-                  accountByMint,
-                  bids,
-                  bidRedemptions,
-                  prizeTrackingTickets,
-                );
-
-                const message =
-                  cancelBidMessages[isAuctioneer ? 'redeemed' : 'refunded'];
-
-                notification.success(message);
-              } catch (e: any) {
-                notification.error({
-                  message: 'Bid Refund Error',
-                  description:
-                    'There was an error refunding your bid. Please try again or reach out to support.',
-                });
-              }
+              notification.success(
+                isAuctioneer
+                  ? NOTIFICATION_MESSAGES.success.reclaimedItems
+                  : NOTIFICATION_MESSAGES.success.cancelBid,
+              );
+            } catch (e: any) {
+              Bugsnag.notify(e);
+              notification.error(
+                isAuctioneer
+                  ? NOTIFICATION_MESSAGES.error.reclaimedItems
+                  : NOTIFICATION_MESSAGES.error.cancelBid,
+              );
             }
-          } finally {
-            setLoading(false);
           }
+
+          setLoading(false);
         }}
       >
-        {loading ||
-        auctionView.items.find(i => i.find(it => !it.metadata)) ||
-        !myPayingAccount ? (
+        {showRRRSpinner ? (
           <Spin indicator={<LoadingOutlined />} />
         ) : eligibleForAnything ? (
           `Claim NFT`
@@ -794,6 +984,19 @@ export const AuctionCard = ({
         : auctionView.myBidderPot
         ? 'Claim Purchase'
         : 'Buy Now'}
+    </Button>
+  );
+
+  const ClaimInstantSaleBtn = (
+    <Button
+      className="metaplex-fullwidth p-4"
+      type="primary"
+      size="large"
+      block
+      loading={loading}
+      onClick={instantSale}
+    >
+      {auctionView.myBidderPot ? 'Claim Purchase' : 'Buy Now'}
     </Button>
   );
 
@@ -944,19 +1147,6 @@ export const AuctionCard = ({
 
   const showConnectToBidBtn = !hideDefaultAction && !wallet.connected;
 
-  // Show the refund/reclaim/redeem bid button
-  const showRedeemReclaimRefundBtn =
-    showPlaceBidUI &&
-    !hideDefaultAction &&
-    wallet.connected &&
-    auctionView.auction.info.ended() &&
-    !auctionView.myBidderMetadata?.info.cancelled;
-  //&&
-  // reoves the redeem bid button if you never placed a bid in the first place
-  // bids.some(bid => bid.info.bidderPubkey === wallet.publicKey?.toBase58())
-  // !(!eligibleForAnything && !isAuctioneer);
-  // &&!isBidderPotEmpty;
-
   const duringAuctionNotConnected = !auctionEnded && !wallet.connected;
 
   return (
@@ -1046,7 +1236,11 @@ export const AuctionCard = ({
 
         {!shouldHide && (
           <>
-            {showRedeemReclaimRefundBtn && RedeemReclaimRefundBtn}
+            <div className="space-y-4">
+              {showRedeemReclaimRefundBtn && RedeemReclaimRefundBtn}
+              {showSpecialRedeemBtn && SpecialRedeemBtn}
+              {showSpecialCancelBidBtn && SpecialCancelBidBtn}
+            </div>
 
             {/* before auction */}
             {actuallyShowStartAuctionBtn && StartAuctionBtn}
