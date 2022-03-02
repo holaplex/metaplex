@@ -5,7 +5,7 @@ export * from './labels';
 export * from './style';
 
 
-export let QUOTE_MINT = WRAPPED_SOL_MINT;
+export const QUOTE_MINT = WRAPPED_SOL_MINT;
 
 export const set_QUOTE_MINT = function(new_qm: PublicKey){
     QUOTE_MINT = new_qm;

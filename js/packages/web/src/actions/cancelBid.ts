@@ -135,8 +135,8 @@ export async function setupCancelBid(
   const cancelInstructions: TransactionInstruction[] = [];
   const cleanupInstructions: TransactionInstruction[] = [];
 
-  const tokenAccount = accountsByMint.get(QUOTE_MINT.toBase58());
-  const mint = cache.get(QUOTE_MINT.toBase58());
+  const tokenAccount = accountsByMint.get(auctionView.auction.info.tokenMint));
+  const mint = cache.get(auctionView.auction.info.tokenMint));
 
   if (mint && auctionView.myBidderPot) {
     const receivingSolAccount = ensureWrappedAccount(

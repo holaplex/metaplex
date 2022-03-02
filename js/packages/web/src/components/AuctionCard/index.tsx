@@ -371,7 +371,7 @@ export const AuctionCard = ({
     value * LAMPORTS_PER_SOL < priceFloor ||
     belowMinBid ||
     loading ||
-    !accountByMint.get(QUOTE_MINT.toBase58());
+    !accountByMint.get(auctionView.auction.info.tokenMint));
 
   useEffect(() => {
     if (wallet.connected) {
@@ -822,7 +822,7 @@ export const AuctionCard = ({
           <Button
             disabled={invalidBid}
             type="primary"
-            loading={loading || !accountByMint.get(QUOTE_MINT.toBase58())}
+            loading={loading || !accountByMint.get(auctionView.auction.info.tokenMint))}
             onClick={async () => {
               setLoading(true);
 
