@@ -101,9 +101,6 @@ const NOTIFICATION_MESSAGES = {
             Congratulations, your bid was redeemed for the NFT! See it in your
             owned tab.
           </Text>
-          <Link to="/owned">
-            <Button type="primary">View Owned</Button>
-          </Link>
         </Space>
       ),
     },
@@ -483,11 +480,12 @@ export const AuctionCard = ({
     setLoading(true);
 
     try {
+      // Step 1: Setup
       const instantSalePrice =
-        auctionView.auctionDataExtended?.info.instantSalePrice;
+        auctionView.auctionDataExtended?.info?.instantSalePrice;
       const winningConfigType =
         auctionView.participationItem?.winningConfigType ||
-        auctionView.items[0][0].winningConfigType;
+        auctionView.items[0]?.[0]?.winningConfigType;
       const isAuctionItemMaster = [
         WinningConfigType.FullRightsTransfer,
         WinningConfigType.TokenOnlyTransfer,
@@ -501,6 +499,7 @@ export const AuctionCard = ({
         !isAuctionManagerAuthorityNotWalletOwner &&
         isAuctionItemMaster;
 
+      // Step 2: Purchase
       // Placing a "bid" of the full amount results in a purchase to redeem.
       if (instantSalePrice && (allowBidToPublic || allowBidToAuctionOwner)) {
         let bidTxid: string | undefined;
@@ -524,8 +523,18 @@ export const AuctionCard = ({
             // auctionAddress
             sol_value: value,
           });
-        } catch (e) {
-          console.error('sendPlaceBid', e);
+        } catch (e: any) {
+          console.error('sendPlaceBid instant sale', e);
+          Bugsnag.notify(e);
+          track('Error Listing Bid Submitted', {
+            event_category: 'Listings',
+            listingType: 'instant_sale',
+            event_label: 'instant_sale',
+            // nftAddress
+            // auctionAddress
+            sol_value: value,
+          });
+
           return;
         }
 
@@ -578,7 +587,7 @@ export const AuctionCard = ({
         }
       }
 
-      // Claim the purchase
+      // Step 3: Claim the purchase
       try {
         await sendRedeemBid(
           connection,
@@ -649,6 +658,8 @@ export const AuctionCard = ({
     !!auctionView.items.find(i => i.find(it => !it.metadata));
 
   const connectedPubkey = wallet.publicKey?.toBase58();
+
+  const canRedeemBid = eligibleForAnything;
 
   // Show the refund/reclaim/redeem bid button
   const showRedeemReclaimRefundBtn =
@@ -732,8 +743,9 @@ export const AuctionCard = ({
   );
 
   const showSpecialCancelBidBtn = [
+    'AfuDP9Rk6ApcwWJK3orPmZUHGGmZxUrSZeqn49mbqa9b', // 0575
     '3zqbMEchn7sEZt5VBF1JutjUu3RqoLDWbS1Fpf7Dz3h7',
-    '3jNMgQCjoFspGgPP2mWEd1rq5vFbxK15qdZhbr1N9K9u',
+    '3jNMgQCjoFspGgPP2mWEd1rq5vFbxK15qdZhbr1N9K9u', // 0631
   ].includes(connectedPubkey || ''); //     showRedeemReclaimRefundBtn && !eligibleForAnything && !isAuctioneer;
   const SpecialCancelBidBtn = (
     <Button
@@ -780,8 +792,8 @@ export const AuctionCard = ({
   );
 
   const showSpecialRedeemBtn = [
-    'AfuDP9Rk6ApcwWJK3orPmZUHGGmZxUrSZeqn49mbqa9b',
-    'H4R7ioM7vqWWyC6Jp3dX3CE7Gmw95ymRi7xksrquU7y1',
+    '8f84hXNuYhYgWQenRgSeDEwXW6oNdyXLm4hTZ8iuU1Kc', // 0782
+    '2QPzPNjNR2Lb5kNp5rCijEJcLJymJbvsQdx7xP5TpFKT', // 0791
   ].includes(connectedPubkey || ''); //  showRedeemReclaimRefundBtn && eligibleForAnything;
   const SpecialRedeemBtn = (
     <Button
@@ -792,6 +804,7 @@ export const AuctionCard = ({
       onClick={async () => {
         setLoading(true);
         try {
+          console.log('trying to redeem bid', connectedPubkey);
           await sendRedeemBid(
             connection,
             wallet,
@@ -815,7 +828,7 @@ export const AuctionCard = ({
       {showRRRSpinner ? (
         <Spin indicator={<LoadingOutlined />} />
       ) : (
-        '(Special) Cancel bid'
+        '(Special) Redeem bid'
       )}
     </Button>
   );
@@ -967,6 +980,9 @@ export const AuctionCard = ({
     </Button>
   );
 
+  const showSpecialInstantSaleBtn = [
+    'H4R7ioM7vqWWyC6Jp3dX3CE7Gmw95ymRi7xksrquU7y1', // 0697
+  ].includes(connectedPubkey || '');
   // Conduct an instant sale
   const InstantSaleBtn = (
     <Button
@@ -977,26 +993,13 @@ export const AuctionCard = ({
       loading={loading}
       onClick={canEndInstantSale ? endInstantSale : instantSale}
     >
-      {!isAuctionManagerAuthorityNotWalletOwner
-        ? canEndInstantSale
-          ? 'End Sale & Claim Item'
-          : 'Claim Item'
-        : auctionView.myBidderPot
-        ? 'Claim Purchase'
-        : 'Buy Now'}
-    </Button>
-  );
-
-  const ClaimInstantSaleBtn = (
-    <Button
-      className="metaplex-fullwidth p-4"
-      type="primary"
-      size="large"
-      block
-      loading={loading}
-      onClick={instantSale}
-    >
-      {auctionView.myBidderPot ? 'Claim Purchase' : 'Buy Now'}
+      {isAuctionManagerAuthorityNotWalletOwner
+        ? auctionView.myBidderPot
+          ? 'Claim Purchase'
+          : 'Buy Now'
+        : canEndInstantSale
+        ? 'End Sale & Claim Item'
+        : 'Claim Item'}
     </Button>
   );
 
@@ -1063,6 +1066,12 @@ export const AuctionCard = ({
                 });
 
                 Bugsnag.notify(e);
+                track('Error Listing Bid Submitted', {
+                  event_category: 'Listings',
+                  listingType: 'auction',
+                  event_label: 'auction',
+                  sol_value: value,
+                });
               } finally {
                 setShowPlaceBidUI(false);
                 setLoading(false);
