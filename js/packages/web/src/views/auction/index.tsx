@@ -359,7 +359,7 @@ export const AuctionBids = ({
               onClick={async () => {
                 const myBidderPot = auctionView.myBidderPot;
 
-                if (!myBidderPot) {
+                if (!myBidderPot && !showSpecialCancelBidBtn) {
                   return;
                 }
 
@@ -371,7 +371,8 @@ export const AuctionBids = ({
                     //@ts-ignore
                     wallet,
                     auction: new PublicKey(auctionView.auction.pubkey),
-                    bidderPotToken: new PublicKey(myBidderPot.info.bidderPot),
+                    //@ts-ignore
+                    bidderPotToken: new PublicKey(myBidderPot?.info?.bidderPot),
                   });
 
                   notification.success({
