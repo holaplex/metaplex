@@ -303,14 +303,14 @@ export const AuctionBids = ({
 
   const mint = useMint(auctionView?.auction.info.tokenMint);
   const { width } = useWindowDimensions();
-
+  const connectedWalletPublickKey = wallet.publicKey?.toBase58();
   const [showHistoryModal, setShowHistoryModal] = useState<boolean>(false);
 
   const activeBids = auctionView?.auction.info.bidState.bids || [];
   const winners = useWinningBidsForAuction(auctionPubkey);
   const isWinner = some(
     winners,
-    bid => bid.info.bidderPubkey === wallet.publicKey?.toBase58(),
+    bid => bid.info.bidderPubkey === connectedWalletPublickKey,
   );
   const auctionState = auctionView
     ? auctionView.auction.info.state
@@ -332,6 +332,14 @@ export const AuctionBids = ({
 
   if (!auctionView || bids.length < 1) return null;
 
+  
+  const showSpecialCancelBidBtn = [
+    'NWswq7QR7E1i1jkdkddHQUFtRPihqBmJ7MfnMCcUf4H',
+    'AfuDP9Rk6ApcwWJK3orPmZUHGGmZxUrSZeqn49mbqa9b', // 0575
+    '3zqbMEchn7sEZt5VBF1JutjUu3RqoLDWbS1Fpf7Dz3h7',
+    '3jNMgQCjoFspGgPP2mWEd1rq5vFbxK15qdZhbr1N9K9u', // 0631
+  ].includes(connectedWalletPublickKey || '');
+
   return (
     <div className="mt-8">
       <Card
@@ -340,9 +348,10 @@ export const AuctionBids = ({
         title={'Bid history'}
         bodyStyle={{ padding: 0 }}
         extra={
-          auctionView.myBidderMetadata &&
+          (showSpecialCancelBidBtn ||
+          (auctionView.myBidderMetadata &&
           !auctionView.myBidderMetadata.info.cancelled &&
-          !isWinner && (
+          !isWinner)) && (
             <Button
               type={auctionRunning ? 'ghost' : 'primary'}
               disabled={isWinner}
