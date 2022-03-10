@@ -773,7 +773,7 @@ export const AuctionCard = ({
   // Start the auction
   const StartAuctionBtn = (
     <Button
-      className="metaplex-fullwidth p-4"
+      className="p-4 metaplex-fullwidth"
       type="primary"
       size="large"
       loading={loading}
@@ -798,7 +798,7 @@ export const AuctionCard = ({
   // Show the place-bid UI
   const PlaceBidBtn = (
     <Button
-      className="metaplex-fullwidth p-4"
+      className="p-4 metaplex-fullwidth"
       type="primary"
       size="large"
       onClick={() => {
@@ -813,7 +813,7 @@ export const AuctionCard = ({
   // Conduct an instant sale
   const InstantSaleBtn = (
     <Button
-      className="metaplex-fullwidth p-4"
+      className="p-4 metaplex-fullwidth"
       type="primary"
       size="large"
       block
@@ -831,27 +831,27 @@ export const AuctionCard = ({
   );
 
   // Crossmint credit card checkout
-  const maybeCrossMintButton = (auctionView: AuctionView, storefront: Storefront) => {
-    if (auctionView.isInstantSale && storefront.integrations?.crossmintClientId) {
+  // const maybeCrossMintButton = (auctionView: AuctionView, storefront: Storefront) => {
+  //   if (auctionView.isInstantSale && storefront.integrations?.crossmintClientId) {
 
-      return (
-        <CrossMintButton
-          listingId={auctionView.auction.pubkey}
-          collectionDescription={artDescription || storefront.meta.description}
-          collectionTitle={artTitle || storefront.meta.title}
-          collectionPhoto={artImage || storefront.theme.logo}
-          // todo -- rmv inline styles once this component is testable.
-          style={{
-            width: '100%',
-            height: '40px',
-            borderRadius: '2px',
-            marginTop: '12px',
-          }}
-        />
+  //     return (
+  //       <CrossMintButton
+  //         listingId={auctionView.auction.pubkey}
+  //         collectionDescription={artDescription || storefront.meta.description}
+  //         collectionTitle={artTitle || storefront.meta.title}
+  //         collectionPhoto={artImage || storefront.theme.logo}
+  //         // todo -- rmv inline styles once this component is testable.
+  //         style={{
+  //           width: '100%',
+  //           height: '40px',
+  //           borderRadius: '2px',
+  //           marginTop: '12px',
+  //         }}
+  //       />
 
-      )
-    }
-  }
+  //     )
+  //   }
+  // }
 
   // Components for inputting bid amount and placing a bid
   const PlaceBidUI = (
@@ -1140,7 +1140,7 @@ export const AuctionCard = ({
               )}
             {showPlaceBidButton && PlaceBidBtn}
             {actuallyShowPlaceBidUI && PlaceBidUI}
-            {maybeCrossMintButton(auctionView, storefront)}
+            {/* {maybeCrossMintButton(auctionView, storefront)} */}
           </>
         )}
       </Card>
@@ -1177,14 +1177,14 @@ const WinnerProfile = ({
   }, []);
   return (
     <a href={`https://www.holaplex.com/profiles/${bidderPubkey}`}>
-      <div className="flex items-center px-4 py-4 sm:px-6 cursor-pointer rounded-lg  group">
-        <div className="min-w-0 flex-1 flex items-center transition-colors">
+      <div className="flex items-center px-4 py-4 rounded-lg cursor-pointer sm:px-6 group">
+        <div className="flex items-center flex-1 min-w-0 transition-colors">
           <div className="flex-shrink-0 pr-4">
             <Identicon size={48} address={bidderPubkey} />
           </div>
-          <div className="min-w-0 flex-1 flex justify-between group-hover:text-primary text-color-text">
+          <div className="flex justify-between flex-1 min-w-0 group-hover:text-primary text-color-text">
             <div className="text-color-text">
-              <p className=" font-medium  truncate flex items-center  group-hover:text-primary text-color-text">
+              <p className="flex items-center font-medium truncate group-hover:text-primary text-color-text">
                 {bidderTwitterHandle || shortenAddress(bidderPubkey)}
               </p>
             </div>
@@ -1192,7 +1192,7 @@ const WinnerProfile = ({
           <div className="flex items-center group-hover:text-primary text-color-text">
             <span className="block">View profile</span>
             <ChevronRightIcon
-              className="h-5 w-5"
+              className="w-5 h-5"
               viewBox="0 0 18 18"
               aria-hidden="true"
             />

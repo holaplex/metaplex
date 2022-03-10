@@ -45,7 +45,7 @@ import { cacheAllAuctions } from '../../actions';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useAuctionManagersToCache, useNotifications } from '../../hooks';
 import Bugsnag from '@bugsnag/browser';
-import { CrossMintStatusButton } from '@crossmint/client-sdk-react-ui';
+// import { CrossMintStatusButton } from '@crossmint/client-sdk-react-ui';
 import styled from 'styled-components';
 
 const StyledLink = styled.a`
@@ -458,7 +458,7 @@ function InnerAdminView({
           dataSource={notifications}
         />
 
-        <h2>Credit Card Payments</h2>
+        {/* <h2>Credit Card Payments</h2>
         <div className="metaplex-flex-column metaplex-gap-4">
           <p>
             Increase your sales by accepting credit and debit card payments
@@ -496,7 +496,7 @@ function InnerAdminView({
             Please note that credit card payments are currently only supported
             for instant sale auctions. More sale types are coming soon.
           </p>
-        </div>
+        </div> */}
 
         <div className="metaplex-flex-column metaplex-gap-4">
           <h2>Administrator Actions</h2>

@@ -34,17 +34,17 @@ export const Providers: FC<ProvidersProps> = ({ children, storefront }) => {
                 <LoaderProvider>
                   <ConfettiProvider>
                     <AnalyticsProvider>
-                      {storefront.integrations?.crossmintClientId ? (
+                      {/* {storefront.integrations?.crossmintClientId ? (
                         <CrossmintWrapper>
                           <AppLayout storefront={storefront}>
                             {children}
                           </AppLayout>
                         </CrossmintWrapper>
-                      ) : (
+                      ) : ( */}
                         <AppLayout storefront={storefront}>
                           {children}
                         </AppLayout>
-                      )}
+                      {/* )} */}
                     </AnalyticsProvider>
                   </ConfettiProvider>
                 </LoaderProvider>
@@ -57,16 +57,15 @@ export const Providers: FC<ProvidersProps> = ({ children, storefront }) => {
   );
 };
 
-const CrossmintWrapper = ({ children }: { children: React.ReactNode }) => {
-  const { storefront, storeAddress } = useStore();
-
-  return (
-    <CrossMintProvider
-      clientId={storefront.integrations?.crossmintClientId!}
-      auctionId={storeAddress}
-      hideMintOnInactiveClient={true}
-    >
-      {children}
-    </CrossMintProvider>
-  );
-};
+// const CrossmintWrapper = ({ children }: { children: React.ReactNode }) => {
+//   const { storefront, storeAddress } = useStore();
+//   return (
+//     <CrossMintProvider
+//       clientId={storefront.integrations?.crossmintClientId!}
+//       auctionId={storeAddress}
+//       hideMintOnInactiveClient={true}
+//     >
+//       {children}
+//     </CrossMintProvider>
+//   );
+// };
