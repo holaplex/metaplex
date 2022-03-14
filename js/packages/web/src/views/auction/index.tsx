@@ -1,4 +1,7 @@
 import { InfoCircleFilled, LoadingOutlined } from '@ant-design/icons';
+
+import { QUOTE_MINT } from '../../constants';
+
 import {
   AuctionState,
   MetaplexModal,
@@ -301,7 +304,7 @@ export const AuctionBids = ({
   const wallet = useWallet();
   const [cancellingBid, setCancellingBid] = useState(false);
 
-  const mint = useMint(auctionView?.auction.info.tokenMint);
+  const mint = useMint(QUOTE_MINT)
   const { width } = useWindowDimensions();
 
   const [showHistoryModal, setShowHistoryModal] = useState<boolean>(false);

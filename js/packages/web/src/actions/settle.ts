@@ -262,7 +262,7 @@ async function claimAllBids(
       bid.info.bidderAct,
       bid.info.bidderPot,
       auctionView.vault.pubkey,
-      auctionView.auction.info.tokenMint,
+      QUOTE_MINT.toBase58(),
       claimBidInstructions,
     );
 

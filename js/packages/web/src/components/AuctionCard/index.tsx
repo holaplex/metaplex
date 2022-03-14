@@ -251,7 +251,7 @@ export const AuctionCard = ({
   );
   const navigate = useNavigate();
 
-  const mintInfo = useMint(auctionView.auction.info.tokenMint);
+  const mintInfo = useMint(QUOTE_MINT);
   const { prizeTrackingTickets, bidRedemptions } = useMeta();
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -268,7 +268,7 @@ export const AuctionCard = ({
 
   const { accountByMint } = useUserAccounts();
 
-  const mintKey = auctionView.auction.info.tokenMint;
+  const mintKey = QUOTE_MINT.toBase58();
   const balance = useUserBalance(mintKey);
 
   const connectedWalletPublickKey = wallet?.publicKey?.toBase58();
@@ -376,7 +376,7 @@ export const AuctionCard = ({
     value * LAMPORTS_PER_SOL < priceFloor ||
     belowMinBid ||
     loading ||
-    !accountByMint.get(QUOTE_MINT.toBase58());
+    !accountByMint.get(auctionView.auction.info.tokenMint));
 
   useEffect(() => {
     if (wallet.connected) {
@@ -853,7 +853,7 @@ export const AuctionCard = ({
       className="metaplex-fullwidth metaplex-space-align-stretch"
       direction="vertical"
     >
-      <h5>{`Bid ${minNextBid} SOL or more`}</h5>
+      <h5>{`Bid ${minNextBid} or more`}</h5>
       <Row gutter={8} align="middle">
         <Col flex="1 0 auto">
           <InputNumber<number>
@@ -865,14 +865,14 @@ export const AuctionCard = ({
             onChange={v => setValue(v)}
             precision={2}
             formatter={value => (value ? `◎ ${value}` : '')}
-            placeholder={`Bid ${minNextBid} SOL or more`}
+            placeholder={`Bid ${minNextBid} or more`}
           />
         </Col>
         <Col flex="0 0 auto">
           <Button
             disabled={invalidBid}
             type="primary"
-            loading={loading || !accountByMint.get(QUOTE_MINT.toBase58())}
+            loading={loading || !accountByMint.get(auctionView.auction.info.tokenMint))}
             onClick={async () => {
               setLoading(true);
 
@@ -940,12 +940,12 @@ export const AuctionCard = ({
               {notEnoughFundsToBid && (
                 <Text className="danger" type="danger">
                   You do not have enough funds to fulfill the bid. Your current
-                  bidding power is {biddingPower} SOL.
+                  bidding power is {biddingPower}.
                 </Text>
               )}
               {value !== undefined && !!belowMinBid && (
                 <Text className="danger" type="danger">
-                  The bid must be at least {minNextBid} SOL.
+                  The bid must be at least {minNextBid}.
                 </Text>
               )}
               {!!value && tickSizeInvalid && tickSize && (
@@ -972,7 +972,7 @@ export const AuctionCard = ({
     x.auction.info.timeToEnd().minutes === 0 &&
     x.auction.info.timeToEnd().seconds === 0;
 
-  const mint = useMint(auctionView?.auction.info.tokenMint);
+  const mint = useMint(QUOTE_MINT)
 
   const auctionEnded = auctionView.isInstantSale
     ? undefined

@@ -143,7 +143,7 @@ export async function setupPlaceBid(
     wallet.publicKey.toBase58(),
     payingSolAccount,
     bidderPotTokenAccount,
-    auctionView.auction.info.tokenMint,
+    QUOTE_MINT.toBase58(),
     transferAuthority.publicKey.toBase58(),
     wallet.publicKey.toBase58(),
     auctionView.auctionManager.vault,

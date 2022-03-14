@@ -62,7 +62,7 @@ export const PriceAuction = (props: {
                   className="metaplex-fullwidth"
                   step="0.01"
                   autoFocus
-                  placeholder="Fixed Price in SOL"
+                  placeholder="Fixed Price"
                   onChange={price => {
                     props.setAttributes({
                       ...props.attributes,
@@ -105,7 +105,7 @@ export const PriceAuction = (props: {
                   className="metaplex-fullwidth"
                   step="0.01"
                   autoFocus
-                  placeholder="Price in SOL"
+                  placeholder="Price"
                   onChange={price => {
                     props.setAttributes({
                       ...props.attributes,
@@ -140,7 +140,7 @@ export const PriceAuction = (props: {
                 decimalSeparator="."
                 className="metaplex-fullwidth"
                 step="0.01"
-                placeholder="Tick size in SOL"
+                placeholder="Tick size"
                 onChange={tick => {
                   props.setAttributes({
                     ...props.attributes,

@@ -14,6 +14,7 @@ import {
 import { AccountLayout } from '@solana/spl-token';
 import { TransactionInstruction, Keypair, Connection } from '@solana/web3.js';
 import { AuctionView } from '../hooks';
+import { QUOTE_MINT } from '../constants';
 import {
   BidRedemptionTicket,
   PrizeTrackingTicket,
@@ -134,8 +135,8 @@ export async function setupCancelBid(
   const cancelInstructions: TransactionInstruction[] = [];
   const cleanupInstructions: TransactionInstruction[] = [];
 
-  const tokenAccount = accountsByMint.get(auctionView.auction.info.tokenMint);
-  const mint = cache.get(auctionView.auction.info.tokenMint);
+  const tokenAccount = accountsByMint.get(auctionView.auction.info.tokenMint));
+  const mint = cache.get(auctionView.auction.info.tokenMint));
 
   if (mint && auctionView.myBidderPot) {
     const receivingSolAccount = ensureWrappedAccount(
@@ -151,7 +152,7 @@ export async function setupCancelBid(
       wallet.publicKey.toBase58(),
       receivingSolAccount,
       auctionView.myBidderPot.info.bidderPot,
-      auctionView.auction.info.tokenMint,
+      QUOTE_MINT.toBase58(),
       auctionView.vault.pubkey,
       cancelInstructions,
     );

@@ -1,3 +1,5 @@
+import { QUOTE_MINT } from '../../../constants';
+
 import { fromLamports, useMint, PriceFloorType } from '@oyster/common';
 import {
   AuctionView,
@@ -54,7 +56,7 @@ export const useAuctionStatus = (
 ): AuctionStatusLabels => {
   const bids = useBidsForAuction(auctionView.auction.pubkey);
   const winningBid = useHighestBidForAuction(auctionView.auction.pubkey);
-  const mintInfo = useMint(auctionView.auction.info.tokenMint);
+  const mintInfo = useMint(QUOTE_MINT);
 
   const participationFixedPrice =
     auctionView.auctionManager.participationConfig?.fixedPrice || 0;

@@ -4,12 +4,15 @@ import React from 'react';
 import { Link, useResolvedPath, useMatch } from 'react-router-dom';
 import cx from 'classnames';
 import { SecondaryMenu } from '../SecondaryMenu';
-
+import { PublicKey } from '@solana/web3.js';
+import { set_QUOTE_MINT, set_QUOTE_MINT_NAME } from '../../constants';
 export const AppBar = () => {
   const { connected, publicKey } = useWallet();
   const { ownerAddress, storefront } = useStore();
   const logo = storefront?.theme?.logo || '';
 
+  set_QUOTE_MINT(new PublicKey(storefront.meta.mint));
+  set_QUOTE_MINT_NAME(storefront.meta.mintname);
   const getMenuItem = (key: string, linkAppend?: string, title?: string) => {
     return {
       key,
