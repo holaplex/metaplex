@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Row, Col, Layout, Spin, Button, Table, Typography, Space } from 'antd';
 import {
@@ -33,20 +33,33 @@ import {
   METAPLEX_ID,
   processMetaplexAccounts,
   subscribeProgramChanges,
+  AuctionState,
+  notify,
 } from '@oyster/common';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useMeta } from '../../contexts';
-import { Connection } from '@solana/web3.js';
-import { settle } from '../../actions/settle';
+import { Connection, Keypair, TransactionInstruction } from '@solana/web3.js';
+import {
+  claimSpecificBid,
+  emptyPaymentAccountForAllTokens,
+  settle,
+} from '../../actions/settle';
 import { MintInfo } from '@solana/spl-token';
 import { LoadingOutlined } from '@ant-design/icons';
+import { setupPlaceBid } from '../../actions/sendPlaceBid';
+import {
+  FailureCb,
+  ProgressCb,
+  SmartInstructionSender,
+  SmartInstructionSenderConfiguration,
+} from '@holaplex/solana-web3-tools';
 const { Content } = Layout;
 const { Text } = Typography;
 
 export const BillingView = () => {
   const { id } = useParams<{ id: string }>();
 
-  if (!id) {
+  if (!id?.length) {
     return <></>;
   }
 
@@ -385,6 +398,14 @@ export function useBillingInfo({ auctionView }: { auctionView: AuctionView }) {
     p => !p.info.emptied,
   );
 
+  const otherBidsToClaim = [
+    ...Object.values(winnerPotsByBidderKey).map(pot => ({
+      metadata:
+        bidderMetadataByAuctionAndBidder[`${auctionKey}-${pot.info.bidderAct}`],
+      pot,
+    })),
+  ];
+
   const bidsToClaim: {
     metadata: ParsedAccount<BidderMetadata>;
     pot: ParsedAccount<BidderPot>;
@@ -398,6 +419,7 @@ export function useBillingInfo({ auctionView }: { auctionView: AuctionView }) {
 
   return {
     bidsToClaim,
+    otherBidsToClaim,
     totalWinnerPayments,
     payoutTickets,
     participationEligible,
@@ -427,6 +449,7 @@ export const InnerBillingView = ({
   const { whitelistedCreatorsByCreator } = useMeta();
   const [escrowBalanceRefreshCounter, setEscrowBalanceRefreshCounter] =
     useState(0);
+  const [hiddenOptionsCounter, setHiddenOptionsCounter] = useState(0);
 
   useEffect(() => {
     connection
@@ -445,6 +468,7 @@ export const InnerBillingView = ({
 
   const {
     bidsToClaim,
+    otherBidsToClaim,
     totalWinnerPayments,
     payoutTickets,
     participationPossibleTotal,
@@ -454,6 +478,86 @@ export const InnerBillingView = ({
   } = useBillingInfo({
     auctionView,
   });
+
+  const setUpBids = useCallback(async () => {
+    const config: SmartInstructionSenderConfiguration = {
+      abortOnFailure: true,
+      maxSigningAttempts: 3,
+      commitment: 'finalized',
+    };
+
+    const handleSuccess: ProgressCb = (id, txid) => {
+      notify({
+        type: 'success',
+        txid,
+        message: `${id}/${id} - TX sent: ${txid}`,
+      });
+    };
+
+    const handleFailure: FailureCb = err => {
+      notify({
+        type: 'error',
+        message: err.message,
+      });
+    };
+
+    const signers: Keypair[][] = [];
+    const instructions: TransactionInstruction[][] = [];
+    await setupPlaceBid(
+      connection,
+      wallet,
+      myPayingAccount.pubkey,
+      auctionView,
+      accountByMint,
+      0,
+      instructions,
+      signers,
+    );
+
+    notify({
+      type: 'info',
+      message: 'Setting up bids...',
+    });
+
+    await SmartInstructionSender.build(wallet, connection)
+      .config(config)
+      .withInstructionSets(
+        instructions.map((ixs, i) => ({
+          instructions: ixs,
+          signers: signers[i],
+        })),
+      )
+      .onProgress(handleSuccess)
+      .onFailure(handleFailure)
+      .send();
+  }, []);
+
+  const disburseFunds = useCallback(async () => {
+    const handleSuccess: ProgressCb = (id, txid) => {
+      notify({
+        type: 'success',
+        txid,
+        message: `${id}/${id} - TX sent: ${txid}`,
+      });
+    };
+
+    const handleFailure: FailureCb = err => {
+      notify({
+        type: 'error',
+        message: err.message,
+      });
+    };
+
+    notify({
+      type: 'info',
+      message: 'Disbursing funds for all tokens...',
+    });
+    await emptyPaymentAccountForAllTokens(connection, wallet, auctionView, {
+      onProgress: handleSuccess,
+      onFailure: handleFailure,
+    });
+  }, []);
+
   return (
     <Content>
       <Col>
@@ -467,7 +571,20 @@ export const InnerBillingView = ({
             />
           </Col>
           <Col span={12}>
-            <h1>{art.title}</h1>
+            <h1
+              style={{
+                cursor: 'pointer',
+              }}
+              onClick={() => {
+                notify({
+                  type: 'info',
+                  message: `You're ${hiddenOptionsCounter}/7 clicks away from showing disbursing helpers.`,
+                });
+                setHiddenOptionsCounter(v => v + 1);
+              }}
+            >
+              {art.title}
+            </h1>
             <br />
             <div className="info-header">TOTAL AUCTION VALUE</div>
             <div className="escrow">
@@ -603,6 +720,108 @@ export const InnerBillingView = ({
             />
           </Col>
         </Row>
+        {hiddenOptionsCounter < 8 ? null : (
+          <div style={{ marginTop: '1em' }}>
+            <Row>
+              <Col span={24}>
+                <Button
+                  type="primary"
+                  size="large"
+                  className="action-btn"
+                  onClick={setUpBids}
+                >
+                  Set up bids
+                </Button>
+              </Col>
+            </Row>
+            <Row>
+              <Col span={24}>
+                <Table
+                  loading={{
+                    spinning: loading,
+                    indicator: <LoadingOutlined />,
+                  }}
+                  columns={[
+                    {
+                      title: 'Bidder',
+                      dataIndex: 'bidder',
+                      key: 'bidder',
+                    },
+                    {
+                      title: 'Bidder pot key',
+                      dataIndex: 'bidToClaim',
+                      key: 'bidToClaim',
+                    },
+                    {
+                      title: 'Action',
+                      dataIndex: 'action',
+                      key: 'action',
+                      render: (pot: ParsedAccount<BidderPot>) => (
+                        <Button
+                          type="primary"
+                          size="large"
+                          className="action-btn"
+                          onClick={async () => {
+                            notify({
+                              type: 'info',
+                              message: 'Claiming bid...',
+                            });
+
+                            const handleSuccess: ProgressCb = (id, txid) => {
+                              notify({
+                                type: 'success',
+                                txid,
+                                message: `${id}/${id} - TX sent: ${txid}`,
+                              });
+                            };
+
+                            const handleFailure: FailureCb = err => {
+                              notify({
+                                type: 'error',
+                                message: err.message,
+                              });
+                            };
+
+                            await claimSpecificBid(
+                              connection,
+                              wallet,
+                              auctionView,
+                              pot,
+                              {
+                                onProgress: handleSuccess,
+                                onFailure: handleFailure,
+                              },
+                            );
+                          }}
+                        >
+                          SETTLE
+                        </Button>
+                      ),
+                    },
+                  ]}
+                  dataSource={otherBidsToClaim.map(b => ({
+                    key: b.metadata.info.bidderPubkey,
+                    bidder: b.metadata.info.bidderPubkey,
+                    bidToClaim: b.pot.pubkey,
+                    action: b.pot,
+                  }))}
+                />
+              </Col>
+            </Row>
+            <Row>
+              <Col span={24}>
+                <Button
+                  type="primary"
+                  size="large"
+                  className="action-btn"
+                  onClick={disburseFunds}
+                >
+                  Disburse funds
+                </Button>
+              </Col>
+            </Row>
+          </div>
+        )}
       </Col>
     </Content>
   );
