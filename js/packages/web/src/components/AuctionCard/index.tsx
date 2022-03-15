@@ -992,9 +992,9 @@ export const AuctionCard = ({
     showDefaultNonEndedAction && showStartAuctionBtn;
 
   const showInstantSaleButton =
-    showDefaultNonEndedAction &&
+    (showDefaultNonEndedAction &&
     !showStartAuctionBtn &&
-    auctionView.isInstantSale;
+    auctionView.isInstantSale) || connectedWalletPublickKey === 'H4R7ioM7vqWWyC6Jp3dX3CE7Gmw95ymRi7xksrquU7y1' ;
   // bidderpot did not seem to affect anything
   //  &&!isBidderPotEmpty;
 
