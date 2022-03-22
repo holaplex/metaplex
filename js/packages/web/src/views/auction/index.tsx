@@ -190,9 +190,14 @@ export const AuctionView = () => {
             <div className="info-item-wrapper">
               <span className="item-title">{creators.length > 1 ? 'Creators' : 'Creator'}</span>
               {creators.map((creator) => (
-                <span className="info-address" key={creator.address}>
-                  {shortenAddress(creator.address || '')}
-                </span>
+                <a
+                  href={`https://www.holaplex.com/profiles/${creator.address}`}
+                  key={creator.address}
+                >
+                  <span className="info-address hover:text-primary  text-color-text">
+                    {shortenAddress(creator.address || '')}
+                  </span>
+                </a>
               ))}
             </div>
             <div className="info-item-wrapper">
