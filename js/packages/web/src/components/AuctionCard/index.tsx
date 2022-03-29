@@ -21,6 +21,7 @@ import {
   shortenAddress,
   Storefront,
   useConnection,
+  useConnectionConfig,
   useMint,
   useStore,
   useUserAccounts,
@@ -62,6 +63,9 @@ import { endSale } from './utils/endSale';
 import { DateTime } from 'luxon';
 import { ChevronRightIcon } from '@heroicons/react/solid';
 import { CrossMintButton } from '@crossmint/client-sdk-react-ui';
+import AuctionAlertSetup from '../AuctionAlertSetupCard';
+import { useLocation } from 'react-router-dom';
+import {BlockchainEnvironment} from '@notifi-network/notifi-react-hooks'
 
 const { Text } = Typography;
 
@@ -937,6 +941,8 @@ export const AuctionCard = ({
 
   const showConnectToBidBtn = !hideDefaultAction && !wallet.connected;
 
+  const connectionConfig = useConnectionConfig();
+  
   // Show the refund/reclaim/reedem bid button
   const showRedeemReclaimRefundBtn =
     showPlaceBidUI &&
@@ -951,6 +957,19 @@ export const AuctionCard = ({
   // &&!isBidderPotEmpty;
 
   const duringAuctionNotConnected = !auctionEnded && !wallet.connected;
+
+  const { location } = useLocation()
+  const adapter = async (message: Uint8Array) => {
+    if (!wallet.signMessage) {
+      return new Uint8Array();
+    }
+
+    const signed = await wallet.signMessage(message);
+    // Sollet Adapter signMessage returns Uint8Array
+    if (signed instanceof Uint8Array) {
+      return signed
+    }
+  }
 
   return (
     <div>
@@ -1060,6 +1079,30 @@ export const AuctionCard = ({
         )}
       </Card>
 
+      <Card
+        bordered={false}
+        className="metaplex-margin-bottom-4 auction-card"
+        headStyle={{
+          borderBottom: !someoneWon ? '0' : '1px solid var(--color-border, #121212)',
+        }}
+        bodyStyle={{
+          padding: shouldHide ? 0 : 24,
+        }}>
+          <AuctionAlertSetup env={connectionConfig.env == 'devnet' ? BlockchainEnvironment.DevNet : BlockchainEnvironment.MainNetBeta}
+            dappId={`${programIds().metadata}-holaplex`}
+            storeName={storefront.subdomain}
+            auctionAddress={auctionView.auction.pubkey}
+            auctionWebUrl={location}
+            isWalletConnected={wallet.connected}
+            signerCallback={async (m) => {
+              const res = await adapter(m)!;
+              if (res == undefined) {
+                return new Uint8Array();
+              }
+              return res!;
+            }}
+            userWalletAddress={wallet ? wallet.publicKey?.toBase58() : undefined} />
+        </Card>
       <MetaplexModal visible={showWarningModal} onCancel={() => setShowWarningModal(false)}>
         <h3>
           Warning: There may be some items in this auction that still are required by the auction
