@@ -1,5 +1,5 @@
 import React, {FC, useEffect, useLayoutEffect, useRef, useState} from 'react';
-import styles from './AuctionAlertSetupCard.module.css'
+
 import {
   BlockchainEnvironment,
   useNotifiClient,
@@ -29,7 +29,7 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
   const [alerts, setAlerts] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [showSubscribeAlertMessage, setShowSubscribeAlertMessage] = useState(false);
-  const [notificationContainerClass, setNotificationContainerClass] = useState(styles.notificationsContainer);
+  const [notificationContainerClass, setNotificationContainerClass] = useState('notificationsContainer');
   const notificationsContainer = useRef<HTMLDivElement>(null);
   const [requestedState, setRequestedState] = useState<InternalState>(InternalState.Uninitialized)
   const [actualState, setActualState] = useState<InternalState>(InternalState.Uninitialized)
@@ -44,10 +44,10 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
       const updateSize = () => {
           if (notificationsContainer.current) {
               const containerWidth = notificationsContainer.current.offsetWidth;
-              const widthClass = containerWidth <= 400 ? styles.notificationsContainer + ' ' + styles.notificationsContainerSm
-                  : containerWidth <= 680 ? styles.notificationsContainer + ' ' + styles.notificationsContainerMd
-                      : containerWidth <= 1100 ? styles.notificationsContainer + ' ' + styles.notificationsContainerLg
-                          : styles.notificationsContainer;
+              const widthClass = containerWidth <= 400 ? 'notificationsContainer notificationsContainerSm'
+                  : containerWidth <= 680 ? 'notificationsContainer' + ' ' + 'notificationsContainerMd'
+                      : containerWidth <= 1100 ? 'notificationsContainer' + ' ' + 'notificationsContainerLg'
+                          : 'notificationsContainer';
               setNotificationContainerClass(widthClass);
           }
       }
@@ -65,11 +65,11 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
     doWork();
   }, [requestedState, actualState]);
 
-  const { fetchData, logIn, isAuthenticated, createAlert, deleteAlert } =
+  const { fetchData, logIn, isAuthenticated, createAlert, deleteAlert, createMetaplexAuctionSource } =
   useNotifiClient({
     dappAddress: props.dappId,
     walletPublicKey: props.userWalletAddress ? props.userWalletAddress : '',
-    env: props.env,
+    env: BlockchainEnvironment.LocalNet,
   });
 
   const advanceToNextActualState = async function () {
@@ -94,23 +94,23 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
         setActualState(InternalState.SignedInToNotifi);
        break;
       case InternalState.SignedInToNotifi: {
-        const {alerts, sources, targetGroups} = await fetchData();
+        const {alerts, targetGroups} = await fetchData();
         
         if (requestedState > InternalState.SignedInToNotifi) {
-          const s = sources.find((it) => {
-            return it.type == "SOLANA_METAPLEX_AUCTION";
+          const s = await createMetaplexAuctionSource({
+            auctionAddressBase58: props.auctionAddress,
+            auctionWebUrl: props.auctionWebUrl
           });
-          
-          if (!s) {
-            throw "Failed to find appropriate Source";
-          }
 
           setSourceId(s.id!);
           const filter = s.applicableFilters.find((it) => {
-            return it.filterType == 'SOLANA_METAPLEX_AUCTION';
+            console.log(it.filterType);
+            return it.filterType == 'NFT_AUCTIONS';
           });
 
           if (!filter) {
+            setRequestedState(InternalState.Uninitialized);
+            setActualState(InternalState.Uninitialized);
             throw "Failed to find appropriate Filter";
           }
 
@@ -118,7 +118,7 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
           
           if (alerts) {
             const alert = alerts.find((it) => {
-              return it.name === props.auctionAddress;
+              return it.name === `Auction: ${props.auctionAddress}`;
             });
 
             if (alert) {
@@ -157,6 +157,12 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
         }
 
         if (requestedState == InternalState.UpdatedData) {
+          if (alertId) {
+            await deleteAlert({alertId});
+            setAlertId('');
+          }
+
+          console.log("Creating Notifi Alert");
           const res = await createAlert({
             filterId: filterId,
             sourceId: sourceId,
@@ -170,7 +176,11 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
 
           if (!res) {
             // TODO: Set error state
+            setRequestedState(InternalState.Uninitialized);
+            setActualState(InternalState.Uninitialized);
             throw "Failed to create Alert";
+          } else {
+            setAlertId(res.id!);
           }
 
           setActualState(InternalState.UpdatedData);
@@ -200,17 +210,20 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
         if (alertId) {
           deleteAlert({alertId});
         }
+
+        setRequestedState(InternalState.Uninitialized);
       }
 
       setRequestedState(InternalState.SyncedData);
   };
 
   const subscribe = () => {
-      setIsSubscribed(true);
-      setShowSubscribeAlertMessage(true);
-      setTimeout(() => {
-          setShowSubscribeAlertMessage(false)
-      }, 5000);
+    setRequestedState(InternalState.UpdatedData)
+    setIsSubscribed(true);
+    setShowSubscribeAlertMessage(true);
+    setTimeout(() => {
+        setShowSubscribeAlertMessage(false)
+    }, 5000);
   };
 
   const editInfo = () => {
@@ -218,63 +231,83 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
       setShowSubscribeAlertMessage(false);
   };
 
+  const onEmailAddressChange = (e: React.FormEvent<HTMLInputElement>) => {
+    setEmailAddress(e.currentTarget.value)
+  }
+
+  const onPhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value
+    if (val.length > 1) {
+      val = val.substring(2)
+    }
+
+    const re = /^[0-9\b]+$/
+    if (val === '' || (re.test(val) && val.length <= 10)) {
+      setPhoneNumber('+1' + val)
+    }
+  }
+
+  const onTelegramChange = (e: React.FormEvent<HTMLInputElement>) => {
+    setTelegramId(e.currentTarget.value)
+  }
+
   return (
       <div className={notificationContainerClass} ref={notificationsContainer}>
-          <div className={styles.getAlertsContainer}>
-              <div className={styles.getAlertsToogleContainer}>
-                  <span className={styles.getAlertsToogleText}>Get Auction and Bid Alerts</span>
+          <div className='getAlertsContainer'>
+              <div className='getAlertsToggleContainer'>
+                  <span className='getAlertsToggleText'>Get Auction and Bid Alerts</span>
 
-                  <div className={styles.getAlertsToogle}>
-                      <label className={styles.getAlertsSwitch}>
+                  <div className='getAlertsToggle'>
+                      <label className='getAlertsSwitch'>
                           <input disabled={!props.isWalletConnected} type="checkbox" onChange={toggleAlerts}/>
-                          <span className={styles.getAlertsSwitchSlider}/>
+                          <span className='getAlertsSwitchSlider'/>
                       </label>
                   </div>
 
-                  {isSubscribed && <div className={styles.subscribedSettings}>
-                      <div className={styles.subscribedSettingsButton}>
+                  {isSubscribed && <div className='subscribedSettings'>
+                      <div className='subscribedSettingsButton'>
                           <img alt="settings" src="/img/settings.png" />
                       </div>
                   </div>}
-                  {(showSubscribeAlertMessage && isSubscribed) && <div className={styles.subscribedAlert}>
+                  {(showSubscribeAlertMessage && isSubscribed) && <div className='subscribedAlert'>
                       <img alt="check" src="/img/check-icon.png" />
                       <span>You’re subscribed for alerts </span>
                   </div>}
               </div>
 
-              <div className={styles.getAlertsPoweredBy}>
-                  <span className={styles.getAlertsPoweredByText}>Powered by</span>
+              <div className='getAlertsPoweredBy'>
+                  <span className='getAlertsPoweredByText'>Powered by</span>
                   <img alt="Powered by Logo" src="/img/logo.png"/>
               </div>
           </div>
 
-          {alerts && <div className={styles.subscribeContainer}>
-              <div className={styles.subscribeInput}>
-                  <div className={styles.subscribeInputContainer}>
+          {alerts && <div className='subscribeContainer'>
+              <div className='subscribeInput'>
+                  <div className='subscribeInputContainer'>
                       <img alt="email" src="/img/email-logo.png"/>
-                      <input type="email" placeholder="Email address" className={isSubscribed ? styles.subscribedInput : ''} readOnly={isSubscribed}/>
+                      <input onChange={onEmailAddressChange} type="email" placeholder="Email address" value={emailAddress} className={isSubscribed ? 'subscribedInput' : ''} readOnly={isSubscribed}/>
                   </div>
               </div>
 
-              <div className={styles.subscribeInput}>
-                  <div className={styles.subscribeInputContainer}>
+              <div className='subscribeInput'>
+                  <div className='subscribeInputContainer'>
                       <img alt="phone" src="/img/mobile-logo.png"/>
-                      <input type="tel" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="Phone number" className={isSubscribed ? styles.subscribedInput : ''} readOnly={isSubscribed}/>
+                      <input onChange={onPhoneNumberChange} type="tel" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="Phone number" value={phoneNumber} className={isSubscribed ? 'subscribedInput' : ''} readOnly={isSubscribed}/>
                   </div>
               </div>
 
-              <div className={styles.subscribeInput}>
-                  <div className={styles.subscribeInputContainer}>
+              <div className='subscribeInput'>
+                  <div className='subscribeInputContainer'>
                       <img alt="telegram" src="/img/telegram-logo.png"/>
-                      <input type="text" placeholder="Telegram" className={isSubscribed ? styles.subscribedInput : ''} readOnly={isSubscribed}/>
+                      <input onChange={onTelegramChange} type="text" placeholder="Coming Soon!" className={isSubscribed ? 'subscribedInput' : ''} readOnly={true}/>
                   </div>
               </div>
 
-              {!isSubscribed && <div className={styles.subscribeButton}>
+              {!isSubscribed && <div className='subscribeButton'>
                   <button onClick={subscribe}>Subscribe</button>
               </div>}
 
-              {isSubscribed && <div className={styles.editButton}>
+              {isSubscribed && <div className='editButton'>
                   <button type="submit" onClick={editInfo}>Edit Info</button>
               </div>}
           </div>}

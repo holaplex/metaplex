@@ -64,7 +64,6 @@ import { DateTime } from 'luxon';
 import { ChevronRightIcon } from '@heroicons/react/solid';
 import { CrossMintButton } from '@crossmint/client-sdk-react-ui';
 import AuctionAlertSetup from '../AuctionAlertSetupCard';
-import { useLocation } from 'react-router-dom';
 import {BlockchainEnvironment} from '@notifi-network/notifi-react-hooks'
 
 const { Text } = Typography;
@@ -958,7 +957,7 @@ export const AuctionCard = ({
 
   const duringAuctionNotConnected = !auctionEnded && !wallet.connected;
 
-  const { location } = useLocation()
+  const location = window === undefined ? undefined : window.location.href;
   const adapter = async (message: Uint8Array) => {
     if (!wallet.signMessage) {
       return new Uint8Array();
@@ -1088,8 +1087,8 @@ export const AuctionCard = ({
         bodyStyle={{
           padding: shouldHide ? 0 : 24,
         }}>
-          <AuctionAlertSetup env={connectionConfig.env == 'devnet' ? BlockchainEnvironment.DevNet : BlockchainEnvironment.MainNetBeta}
-            dappId={`${programIds().metadata}-holaplex`}
+          {location && <AuctionAlertSetup env={connectionConfig.env == 'devnet' ? BlockchainEnvironment.DevNet : BlockchainEnvironment.MainNetBeta}
+            dappId={`${programIds().metaplex}.Holaplex`}
             storeName={storefront.subdomain}
             auctionAddress={auctionView.auction.pubkey}
             auctionWebUrl={location}
@@ -1101,7 +1100,7 @@ export const AuctionCard = ({
               }
               return res!;
             }}
-            userWalletAddress={wallet ? wallet.publicKey?.toBase58() : undefined} />
+            userWalletAddress={wallet ? wallet.publicKey?.toBase58() : undefined} />}
         </Card>
       <MetaplexModal visible={showWarningModal} onCancel={() => setShowWarningModal(false)}>
         <h3>
