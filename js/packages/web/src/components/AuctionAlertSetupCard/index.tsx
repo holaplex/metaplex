@@ -75,7 +75,7 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
   useNotifiClient({
     dappAddress: props.dappId,
     walletPublicKey: props.userWalletAddress ? props.userWalletAddress : '',
-    env: BlockchainEnvironment.LocalNet,
+    env: props.env,
   });
 
   const advanceToNextActualState = async function () {
