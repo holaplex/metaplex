@@ -44,10 +44,10 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
       const updateSize = () => {
           if (notificationsContainer.current) {
               const containerWidth = notificationsContainer.current.offsetWidth;
-              const widthClass = containerWidth <= 400 ? 'notificationsContainer notificationsContainerSm'
-                  : containerWidth <= 680 ? 'notificationsContainer' + ' ' + 'notificationsContainerMd'
-                      : containerWidth <= 1100 ? 'notificationsContainer' + ' ' + 'notificationsContainerLg'
-                          : 'notificationsContainer';
+              const widthClass = containerWidth <= 400 ? 'ant-card-body notificationsContainerSm'
+                  : containerWidth <= 680 ? 'ant-card-body notificationsContainerMd'
+                      : containerWidth <= 1100 ? 'ant-card-body notificationsContainerLg'
+                          : 'ant-card-body';
               setNotificationContainerClass(widthClass);
           }
       }
@@ -59,7 +59,13 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
 
   useEffect(() => {
     const doWork = async() => {
-      await advanceToNextActualState()
+      try {
+        await advanceToNextActualState()
+      } catch (error) {
+        console.log("Exception caught: " + error);
+        setRequestedState(InternalState.Uninitialized);
+        setActualState(InternalState.Uninitialized);
+      }
     };
 
     doWork();
@@ -73,18 +79,17 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
   });
 
   const advanceToNextActualState = async function () {
+    console.log("a:" + actualState);
+    console.log("r: " + requestedState);
     switch (actualState) {
       case InternalState.Uninitialized:
         if (requestedState > actualState) {
           setActualState(InternalState.Initialized);
-          console.log("Uninitialized");
         }
         break;
       case InternalState.Initialized:
-        console.log("Initialized");
         if (requestedState > actualState) {
           setActualState(InternalState.SigningInToNotifi);
-          console.log("SigningInToNotifi");
         }
        break;
       case InternalState.SigningInToNotifi:
@@ -255,7 +260,7 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
       <div className={notificationContainerClass} ref={notificationsContainer}>
           <div className='getAlertsContainer'>
               <div className='getAlertsToggleContainer'>
-                  <span className='getAlertsToggleText'>Get Auction and Bid Alerts</span>
+                  <span className='ant-card-head-title'>Get Auction and Bid Alerts</span>
 
                   <div className='getAlertsToggle'>
                       <label className='getAlertsSwitch'>
@@ -285,7 +290,7 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
               <div className='subscribeInput'>
                   <div className='subscribeInputContainer'>
                       <img alt="email" src="/img/email-logo.png"/>
-                      <input onChange={onEmailAddressChange} type="email" placeholder="Email address" value={emailAddress} className={isSubscribed ? 'subscribedInput' : ''} readOnly={isSubscribed}/>
+                      <input onChange={onEmailAddressChange} type="email" placeholder="Email address" value={emailAddress} className={isSubscribed ? 'ant-input-number-input' : ''} readOnly={isSubscribed}/>
                   </div>
               </div>
 
