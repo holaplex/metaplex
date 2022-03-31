@@ -411,11 +411,11 @@ export const InnerBillingView = ({
   return (
     <Content>
       <Col>
-        <Row className="metaplex-margin-x-8 metaplex-text-align-left">
-          <Col span={12}>
+        <Row className="metaplex-margin-x-8 metaplex-text-align-left justify-between">
+          <div className="max-w-2xl w-full mb-8">
             <ArtContent pubkey={id} backdrop="dark" allowMeshRender square={false} />
-          </Col>
-          <Col span={12}>
+          </div>
+          <div className="max-w-xl w-full">
             <h1>{art.title}</h1>
             <br />
             <div className="info-header">TOTAL AUCTION VALUE</div>
@@ -498,7 +498,7 @@ export const InnerBillingView = ({
                 <Text>{settleErrorMessage}</Text>
               </Space>
             )}
-          </Col>
+          </div>
         </Row>
         <Row>
           <Col span={24}>

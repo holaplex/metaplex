@@ -294,7 +294,7 @@ export const AuctionCard = ({
       : (minBid + fromLamports(tickSize)).toFixed(2)
   );
 
-  const [value, setValue] = useState<number>(minBid);
+  const [value, setBidValue] = useState<number>(minBid);
   const [triedToBid, setTriedToBid] = useState(false);
   const gapTime = (auctionView.auction.info.auctionGap?.toNumber() || 0) / 60;
   const gapTick = auctionExtended ? auctionExtended.info.gapTickSizePercentage : 0;
@@ -344,7 +344,7 @@ export const AuctionCard = ({
   useEffect(() => {
     // Sets the bid input field to the minimum bid automatically
     if (minNextBid > value) {
-      setValue(minNextBid);
+      setBidValue(minNextBid);
     }
   }, [minNextBid]);
 
@@ -806,7 +806,7 @@ export const AuctionCard = ({
             step={minNextBid}
             autoFocus
             value={value}
-            onChange={(v) => setValue(v)}
+            onChange={(v) => setBidValue(v)}
             precision={2}
             formatter={(value) => (value ? `◎ ${value}` : '')}
             placeholder={`Bid ${minNextBid} SOL or more`}
