@@ -1,0 +1,313 @@
+@font-face {
+  font-family: 'Roboto';
+  src: url('/fonts/Roboto/Roboto-Regular.ttf') format("truetype");
+}
+
+@font-face {
+  font-family: 'RotaRegular';
+  src: url('/fonts/Rota/Rota-Regular.woff') format("woff");
+}
+
+@font-face {
+  font-family: 'RotaBold';
+  src: url('/fonts/Rota/Rota-Bold.woff') format("woff");
+}
+
+@font-face {
+  font-family: 'RotaSemibold';
+  src: url('/fonts/Rota/Rota-SemiBold.woff') format("woff");
+}
+
+.notificationsContainer {
+  background-color: #1E1E1E;
+  padding: 29px 34px;
+}
+
+.getAlertsContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.getAlertsToggleContainer {
+  display: flex;
+  align-items: center;
+}
+
+.getAlertsToggleText {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 26px;
+  line-height: 30px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.getAlertsToggle {
+  display: inline-block;
+  margin-left: 30px;
+  position: relative;
+}
+
+.getAlertsPoweredBy {
+  display: flex;
+  align-items: baseline;
+  min-width: 160px;
+}
+
+.getAlertsPoweredByText {
+  font-family: 'RotaSemibold';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 20px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+  display: inline-block;
+  margin-right: 12px;
+}
+
+.getAlertsSwitch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 16px;
+}
+
+.getAlertsSwitch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.getAlertsSwitch input:checked + .getAlertsSwitchSlider {
+  background-color: #A69CD6;
+}
+
+.getAlertsSwitch input:checked + .getAlertsSwitchSlider:before {
+  -webkit-transform: translateX(18px);
+  -ms-transform: translateX(18px);
+  transform: translateX(18px);
+}
+
+.getAlertsSwitchSlider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #80829D;
+  -webkit-transition: .4s;
+  transition: .4s;
+  border-radius: 30px;
+}
+
+.getAlertsSwitchSlider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 1px;
+  background-color: #ffffff;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+  -webkit-transition: .4s;
+  transition: .4s;
+  border-radius: 50%;
+}
+
+.subscribeContainer {
+  margin-top: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.subscribeInputContainer {
+  display: inline-block;
+  position: relative;
+}
+
+.subscribeInputContainer input {
+  border: 0;
+  outline: 0;
+  background-color: #333333;
+  border-radius: 6px;
+  padding: 12px 58px 8px 58px;
+  width: 285px;
+  box-sizing: border-box;
+  font-family: 'RotaRegular';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 27px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.subscribeInputContainer input.subscribedInput {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background-color: transparent;
+}
+
+.subscribeInputContainer img {
+  position: absolute;
+  left: 9px;
+  top: 50%;
+  transform: translate(0, -50%);
+}
+
+.subscribeButton button {
+  border: 0;
+  outline: 0;
+  cursor: pointer;
+  width: 153px;
+  height: 49px;
+  background: #A69CD6;
+  border-radius: 8px;
+  font-family: 'RotaBold';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 25px;
+  color: #000000;
+}
+
+.subscribeButton button:hover {
+  background-color: #9ca1d6;
+}
+
+.editButton button {
+  outline: 0;
+  cursor: pointer;
+  width: 153px;
+  height: 49px;
+  border: 2px solid #A69CD6;
+  box-sizing: border-box;
+  border-radius: 8px;
+  font-family: 'RotaBold';
+  font-style: normal;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 25px;
+  color: #A69CD6;
+  background-color: transparent;
+}
+
+.editButton button:hover {
+  background-color: #A69CD6;
+  color: #ffffff;
+}
+
+.subscribedSettingsButton {
+  margin: 0 34px 0 60px;
+  cursor: pointer;
+}
+
+.subscribedSettings,
+.subscribedAlert {
+  display: flex;
+  align-items: center;
+}
+
+.subscribedAlert img {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+.subscribedAlert span {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 24px;
+  line-height: 28px;
+  color: #A69CD6;
+}
+
+.notificationsContainerLg .getAlertsToggleText {
+  font-size: 22px;
+  line-height: 26px;
+}
+
+.notificationsContainerLg .subscribeInputContainer input {
+  font-size: 18px;
+  line-height: 23px;
+}
+
+.notificationsContainerLg .subscribeInputContainer input {
+  width: 166px;
+  padding-right: 10px;
+  padding-left: 44px;
+}
+
+.notificationsContainerLg .subscribeButton button,
+.notificationsContainerLg .editButton button {
+  font-size: 16px;
+  line-height: 21px;
+  height: 43px;
+  width: 100px;
+}
+
+.notificationsContainerLg .subscribedAlert span {
+  font-size: 16px;
+}
+
+.notificationsContainerLg .getAlertsContainer {
+  align-items: flex-start;
+}
+
+.notificationsContainerLg .getAlertsToggleContainer {
+  flex-wrap: wrap;
+}
+
+.notificationsContainerLg .subscribedSettings {
+  margin: 0 40px;
+}
+
+.notificationsContainerLg .subscribedSettingsButton {
+  margin-left: 0;
+}
+
+.notificationsContainerLg .subscribedAlert {
+  margin: 15px 0;
+}
+
+.notificationsContainerMd .subscribeContainer {
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 0;
+}
+
+.notificationsContainerMd .subscribeInput {
+  width: 100%;
+  text-align: center;
+  margin: 10px 0;
+}
+
+.notificationsContainerMd .subscribeButton button,
+.notificationsContainerMd .editButton button {
+  margin-top: 20px;
+}
+
+.notificationsContainerMd .getAlertsToggleContainer {
+  flex-wrap: wrap;
+}
+
+.notificationsContainerMd .getAlertsContainer {
+  flex-wrap: wrap;
+}
+
+.notificationsContainerMd .getAlertsPoweredBy {
+  width: 100%;
+  margin: 10px 0;
+}
+
+.notificationsContainerMd .subscribedAlert {
+  margin: 15px 0;
+}
+
+.notificationsContainerSm .getAlertsToggle {
+  margin-left: 10px;
+}
