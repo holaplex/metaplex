@@ -14,6 +14,7 @@ import {
   VAULT_ID,
   processVaultData,
   getTwitterHandle,
+  Identicon,
 } from '@oyster/common';
 import { actions } from '@metaplex/js';
 import { PublicKey } from '@solana/web3.js';
@@ -189,13 +190,13 @@ export const AuctionView = () => {
         <div className="info-outer-wrapper">
           <div className="info-items-wrapper">
             <div className="info-item-wrapper">
-              <span className="item-title">{creators.length > 1 ? 'Creators' : 'Creator'}</span>
+              <span className="item-title pb-6">{creators.length > 1 ? 'Creators' : 'Creator'}</span>
               {creators.map((creator) => (
                 <CreatorItem key={creator.address} connection={connection} creator={creator} />
               ))}
             </div>
-            <div className="info-item-wrapper">
-              <span className="item-title">Edition</span>
+            <div className="info-item-wrapper ">
+              <span className="item-title pb-6">Edition</span>
               <span>
                 {(auction?.items.length || 0) > 1
                   ? 'Multiple'
@@ -205,13 +206,13 @@ export const AuctionView = () => {
               </span>
             </div>
             <div className="info-item-wrapper">
-              <span className="item-title">Winners</span>
+              <span className="item-title pb-6">Winners</span>
               <span>
                 {winnerCount === undefined ? <Skeleton paragraph={{ rows: 0 }} /> : winnerCount}
               </span>
             </div>
             <div className="info-item-wrapper">
-              <span className="item-title">NFTs</span>
+              <span className="item-title pb-6">NFTs</span>
               <span>
                 {nftCount === undefined ? <Skeleton paragraph={{ rows: 0 }} /> : nftCount}
               </span>
@@ -273,8 +274,10 @@ const CreatorItem = (props: { creator: Artist; connection: any }) => {
       rel="noreferrer"
       className="hover:text-primary"
     >
-      <span className="info-address " key={creator.address}>
-        {bidderTwitterHandle ? '@' + bidderTwitterHandle : shortenAddress(creator.address || '')}
+      <span className="info-address flex pb-2.5" key={creator.address}>
+      <div className="pr-1 "><Identicon size={22} address={creator.address} /> </div>
+       <div className=""> {bidderTwitterHandle ? '@' + bidderTwitterHandle : shortenAddress(creator.address || '')}
+       </div>
       </span>
     </a>
   );
