@@ -44,7 +44,7 @@ export const Banner = ({
   }
 
   const FollowButton = () => (
-    <button className="flex font-sans  items-center justify-center transition-all rounded-full !bg-white !px-6 !py-2 !text-base !font-medium  !text-gray-900 hover:!text-gray-700 hover:!bg-gray-100">
+    <button className="flex items-center  justify-center rounded-full !bg-white !px-6 !py-2 font-sans !text-base !font-medium !text-gray-900  transition-all hover:!bg-gray-100 hover:!text-gray-700">
       Follow
     </button>
   );
@@ -92,7 +92,7 @@ export const Banner = ({
               }}
             >
               <Popover>
-                {({ open }) => (
+                {() => (
                   <div>
                     <Popover.Button
                       onClick={() => setPOpen(!pOpen)}
@@ -115,11 +115,11 @@ export const Banner = ({
                       {false && (
                         <Popover.Panel
                           static
-                          className=" translate-x-3 absolute overflow-y-auto z-50 max-w-xs w-full  "
+                          className=" absolute z-50 w-full max-w-xs translate-x-3 overflow-y-auto  "
                         >
-                          <div className="mb-3 flex-row w-full">
-                            <div className=" relative flex-col rounded-md border p-3 pl-4 border-white/50 bg-gray-900 w-full">
-                              <div className="flex justify-between items-center">
+                          <div className="mb-3 w-full flex-row">
+                            <div className=" relative w-full flex-col rounded-md border border-white/50 bg-gray-900 p-3 pl-4">
+                              <div className="flex items-center justify-between">
                                 <Identicon size={40} address={creatorAddress} />
 
                                 <a
@@ -212,12 +212,12 @@ export const Banner = ({
               </div>
             )}
           {!twitterVerification ? (
-            <div className="flex justify-center mt-4">
+            <div className="mt-4 flex justify-center">
               <CreatedByAvatars />
             </div>
           ) : (
-            <div className="flex justify-between pt-4 flex-wrap ">
-              <div className=" sm:w-2/5 justify-end flex">
+            <div className="flex flex-wrap justify-between pt-4 ">
+              <div className=" flex justify-end sm:w-2/5">
                 <a
                   href={'https://twitter.com/' + twitterVerification}
                   target="_blank"
@@ -227,7 +227,7 @@ export const Banner = ({
                   <Button
                     type="text"
                     block
-                    className="!p-0 !flex !items-center "
+                    className="!flex !items-center !p-0 "
                     shape="round"
                     icon={
                       <TwitterOutlined style={{ fontSize: '18px', verticalAlign: 'text-top' }} />
@@ -238,11 +238,11 @@ export const Banner = ({
                 </a>
               </div>
 
-              <div className="sm:flex items-center sm:w-1/5 justify-center hidden ">
+              <div className="hidden items-center justify-center sm:flex sm:w-1/5 ">
                 <h3 className="text-primary">|</h3>
               </div>
 
-              <CreatedByAvatars className="sm:w-2/5 justify-start" />
+              <CreatedByAvatars className="justify-start sm:w-2/5" />
             </div>
           )}
         </div>
@@ -279,21 +279,21 @@ export const Banner = ({
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <div className="inline-block w-full max-w-md relative pt-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-gray-900 shadow-xl rounded-2xl ">
+                <div className="relative my-8 inline-block w-full max-w-md transform overflow-hidden rounded-2xl bg-gray-900 pt-6 text-left align-middle shadow-xl transition-all ">
                   <XIcon
-                    className="text-white h-6 w-6 absolute top-4 right-4 cursor-pointer hover:text-gray-100"
+                    className="absolute top-4 right-4 h-6 w-6 cursor-pointer text-white hover:text-gray-100"
                     onClick={closeModal}
                     aria-hidden="true"
                   />
                   <Dialog.Title
                     as="h3"
-                    className="text-center pb-4 border-b-2  font-medium text-white"
+                    className="border-b-2 pb-4 text-center  font-medium text-white"
                   >
                     Creators
                   </Dialog.Title>
                   <div
                     className={classNames(
-                      'space-y-6 h-96 p-6 ',
+                      'h-96 space-y-6 p-6 ',
                       // could be some Windows funk, but without this the scrollbar was always present
                       creators.length > 6 && 'overflow-y-scroll'
                     )}

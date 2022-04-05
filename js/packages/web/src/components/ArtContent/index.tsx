@@ -2,7 +2,7 @@ import { MetadataCategory, MetadataFile, pubkeyToString } from '@oyster/common';
 import { PublicKey } from '@solana/web3.js';
 import Loading from 'react-loading';
 import { Image } from 'antd';
-import React, { ReactElement, useCallback, useEffect, useState } from 'react';
+import React, { ReactElement } from 'react';
 import cx from 'classnames';
 import { useCachedImage, useExtendedArt } from '../../hooks';
 import { getLast } from '../../utils/utils';
@@ -64,7 +64,6 @@ const VideoArtContent = ({
   files,
   uri,
   animationURL,
-  active,
 }: {
   files?: (MetadataFile | string)[];
   uri?: string;
