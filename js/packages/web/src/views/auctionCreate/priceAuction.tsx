@@ -2,7 +2,6 @@ import { Button, InputNumber, Space, Form } from 'antd';
 import { useForm } from 'antd/lib/form/Form';
 import React from 'react';
 import { AuctionCategory, AuctionState } from '.';
-import Alert from '@material-ui/lab/Alert';
 
 export const PriceAuction = (props: {
   attributes: AuctionState;
