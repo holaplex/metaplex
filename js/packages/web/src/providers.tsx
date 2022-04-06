@@ -14,14 +14,18 @@ import { CoingeckoProvider } from './contexts/coingecko';
 import { Storefront } from '@oyster/common';
 import { AnalyticsProvider } from './contexts';
 import { CrossMintProvider } from '@crossmint/client-sdk-react-ui';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
 interface ProvidersProps {
   storefront: Storefront;
   children: React.ReactNode;
 }
 
+const queryClient = new QueryClient();
+
 export const Providers: FC<ProvidersProps> = ({ children, storefront }) => {
   return (
+  <QueryClientProvider client={queryClient}>
     <ConnectionProvider>
       <StoreProvider storefront={storefront} storeAddress={process.env.NEXT_PUBLIC_STORE_ADDRESS}>
         <WalletProvider>
@@ -47,6 +51,7 @@ export const Providers: FC<ProvidersProps> = ({ children, storefront }) => {
         </WalletProvider>
       </StoreProvider>
     </ConnectionProvider>
+  </QueryClientProvider>                       
   );
 };
 
