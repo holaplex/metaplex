@@ -20,7 +20,7 @@ import { PublicKey } from '@solana/web3.js';
 import { AuctionViewItem } from '@oyster/common/dist/lib/models/metaplex/index';
 import { Link } from 'react-router-dom';
 import { useWallet } from '@oyster/common';
-import { Button, Carousel, List, Skeleton, Spin, Tooltip, notification } from 'antd';
+import { Button, Carousel, Skeleton, Spin, Tooltip, notification } from 'antd';
 import Bugsnag from '@bugsnag/browser';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -382,7 +382,7 @@ export const AuctionBids = ({ auctionView }: { auctionView?: Auction | null }) =
         }
       >
         <div className=" overflow-hidden">
-          <ul role="list" className="divide-color-border divide-y">
+          <ul role="list" className="divide-y divide-color-border">
             {bidLines}
             {/* {bids.map(bid => (
 

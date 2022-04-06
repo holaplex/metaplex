@@ -4,7 +4,6 @@ import {
   PlayCircleOutlined,
   SyncOutlined,
 } from '@ant-design/icons';
-import Bugsnag from '@bugsnag/js';
 import {
   findProgramAddress,
   programIds,
