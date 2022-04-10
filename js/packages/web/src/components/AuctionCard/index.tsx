@@ -1,4 +1,4 @@
-import { LoadingOutlined } from '@ant-design/icons';
+import { InfoCircleFilled, LoadingOutlined } from '@ant-design/icons';
 import {
   AuctionDataExtended,
   AuctionState,
@@ -35,8 +35,19 @@ import Bugsnag from '@bugsnag/browser';
 import { useNavigate } from 'react-router-dom';
 import { AccountLayout, MintLayout } from '@solana/spl-token';
 import { Connection, LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { Button, Card, Col, InputNumber, Row, Space, Spin, Typography, notification } from 'antd';
-import moment from 'moment';
+import {
+  Button,
+  Card,
+  Col,
+  InputNumber,
+  Row,
+  Space,
+  Spin,
+  Typography,
+  notification,
+  Tooltip,
+} from 'antd';
+
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { sendCancelBidOrReclaimItems } from '../../actions/cancelBid';
 import { findEligibleParticipationBidsForRedemption } from '../../actions/claimUnusedPrizes';
@@ -141,7 +152,7 @@ function useGapTickCheck(
   return !!useMemo(() => {
     if (gapTick && value && gapTime && !auctionView.auction.info.ended()) {
       // so we have a gap tick percentage, and a gap tick time, and a value, and we're not ended - are we within gap time?
-      const now = moment().unix();
+      const now = Date.now(); // moment().unix();
       const endedAt = auctionView.auction.info.endedAt;
       if (endedAt) {
         const ended = endedAt.toNumber();
@@ -294,7 +305,7 @@ export const AuctionCard = ({
       : (minBid + fromLamports(tickSize)).toFixed(2)
   );
 
-  const [value, setBidValue] = useState<number>(minBid);
+  const [bidValue, setBidValue] = useState<number>(minBid);
   const [triedToBid, setTriedToBid] = useState(false);
   const gapTime = (auctionView.auction.info.auctionGap?.toNumber() || 0) / 60;
   const gapTick = auctionExtended ? auctionExtended.info.gapTickSizePercentage : 0;
@@ -305,15 +316,15 @@ export const AuctionCard = ({
   const multiplier = 1000;
   const tickSizeInvalid = !!(
     tickSize &&
-    value &&
-    (value * multiplier) % (fromLamports(tickSize) * multiplier) != 0
+    bidValue &&
+    (bidValue * multiplier) % (fromLamports(tickSize) * multiplier) != 0
   );
 
-  const gapBidInvalid = useGapTickCheck(value, gapTick, gapTime, auctionView);
+  const gapBidInvalid = useGapTickCheck(bidValue, gapTick, gapTime, auctionView);
   const isAuctionManagerAuthorityNotWalletOwner =
     auctionView.auctionManager.authority !== connectedWalletPublickKey;
 
-  const belowMinBid = value && minBid && value < minNextBid;
+  const belowMinBid = bidValue && minBid && bidValue < minNextBid;
 
   const biddingPower =
     balance.balance +
@@ -321,14 +332,15 @@ export const AuctionCard = ({
       ? auctionView.myBidderMetadata.info.lastBid.toNumber() / LAMPORTS_PER_SOL
       : 0);
 
-  const notEnoughFundsToBid = !!value && value > biddingPower;
+  const notEnoughFundsToBid = !!bidValue && bidValue > biddingPower;
+
   const invalidBid =
     notEnoughFundsToBid ||
     gapBidInvalid ||
     tickSizeInvalid ||
     !myPayingAccount ||
-    value === undefined ||
-    value * LAMPORTS_PER_SOL < priceFloor ||
+    bidValue === undefined ||
+    bidValue * LAMPORTS_PER_SOL < priceFloor ||
     belowMinBid ||
     loading ||
     !accountByMint.get(QUOTE_MINT.toBase58());
@@ -343,9 +355,19 @@ export const AuctionCard = ({
 
   useEffect(() => {
     // Sets the bid input field to the minimum bid automatically
-    if (minNextBid > value) {
+    if (minNextBid > bidValue) {
       setBidValue(minNextBid);
     }
+    console.log('bid', {
+      bidValue,
+      minNextBid,
+      gapBidInvalid,
+      invalidBid,
+      triedToBid,
+      tickSize,
+      gapTime,
+      gapTick,
+    });
   }, [minNextBid]);
 
   const endInstantSale = async () => {
@@ -439,7 +461,7 @@ export const AuctionCard = ({
             event_label: 'instant_sale',
             // nftAddress
             // auctionAddress
-            sol_value: value,
+            sol_value: bidValue,
           });
         } catch (e: any) {
           console.error('sendPlaceBid instant sale', e);
@@ -450,7 +472,7 @@ export const AuctionCard = ({
             event_label: 'instant_sale',
             // nftAddress
             // auctionAddress
-            sol_value: value,
+            sol_value: bidValue,
           });
 
           return;
@@ -805,7 +827,7 @@ export const AuctionCard = ({
             className="metaplex-fullwidth"
             step={minNextBid}
             autoFocus
-            value={value}
+            value={bidValue}
             onChange={(v) => setBidValue(v)}
             precision={2}
             formatter={(value) => (value ? `◎ ${value}` : '')}
@@ -823,7 +845,7 @@ export const AuctionCard = ({
 
               setLoading(true);
 
-              if (!myPayingAccount || !value) {
+              if (!myPayingAccount || !bidValue) {
                 return;
               }
 
@@ -834,7 +856,7 @@ export const AuctionCard = ({
                   myPayingAccount.pubkey,
                   auctionView,
                   accountByMint,
-                  value
+                  bidValue
                 );
 
                 notification.success({
@@ -847,7 +869,7 @@ export const AuctionCard = ({
                   event_category: 'Listings',
                   listingType: 'auction',
                   event_label: 'auction',
-                  sol_value: value,
+                  sol_value: bidValue,
                 });
               } catch (e: any) {
                 notification.error({
@@ -861,7 +883,7 @@ export const AuctionCard = ({
                   event_category: 'Listings',
                   listingType: 'auction',
                   event_label: 'auction',
-                  sol_value: value,
+                  sol_value: bidValue,
                 });
               } finally {
                 setShowPlaceBidUI(false);
@@ -886,12 +908,12 @@ export const AuctionCard = ({
                   {biddingPower} SOL.
                 </Text>
               )}
-              {value !== undefined && !!belowMinBid && (
+              {bidValue !== undefined && !!belowMinBid && (
                 <Text className="danger" type="danger">
                   The bid must be at least {minNextBid} SOL.
                 </Text>
               )}
-              {!!value && tickSizeInvalid && tickSize && (
+              {!!bidValue && tickSizeInvalid && tickSize && (
                 <Text className="danger" type="danger">
                   Tick size is ◎{tickSize.toNumber() / LAMPORTS_PER_SOL}.
                 </Text>
@@ -965,7 +987,12 @@ export const AuctionCard = ({
         }}
         title={
           <div className="">
-            <span className={auctionEnded || auctionView.isInstantSale ? '' : 'text-sm opacity-75'}>
+            <span
+              className={cx(
+                auctionEnded || auctionView.isInstantSale ? '' : 'text-sm opacity-75',
+                'flex items-center'
+              )}
+            >
               {auctionEnded
                 ? someoneWon
                   ? 'Winner' + (winners.length > 1 ? 's' : '')
@@ -979,6 +1006,14 @@ export const AuctionCard = ({
                 : auctionView.isInstantSale
                 ? 'Fixed price'
                 : 'Ends in'}
+              {!auctionEnded && !auctionView.isInstantSale && (
+                <Tooltip
+                  title={`Gap time: ${gapTime}.\n Gap tick size: ${gapTick}`}
+                  className="ml-2"
+                >
+                  <InfoCircleFilled size={12} />
+                </Tooltip>
+              )}
             </span>
             {!auctionEnded && !auctionView.isInstantSale && (
               <div>

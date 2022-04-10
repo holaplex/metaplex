@@ -76,42 +76,49 @@ export const ArtSelector = ({
       </MetaplexMasonry>
 
       <Modal visible={visible} onCancel={close} onOk={confirm} width={1100} footer={null}>
-        <Space className="metaplex-space-align-stretch" direction="vertical">
-          <h2>Select the NFT you want to sell</h2>
-          <MetaplexMasonry>
-            {items.map((m) => {
-              const id = m.metadata.pubkey;
-              const isSelected = selectedItems.has(id);
+        {/* <Space className="metaplex-space-align-stretch" direction="vertical"> */}
+        <h2>Select the NFT you want to sell</h2>
 
-              const onSelect = () => {
-                let list = [...selectedItems.keys()];
-                if (allowMultiple) {
-                  list = [];
-                }
+        <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 mt-4">
+          {items.map((m) => {
+            const id = m.metadata.pubkey;
+            const isSelected = selectedItems.has(id);
 
-                const newSet = isSelected
-                  ? new Set(list.filter((item) => item !== id))
-                  : new Set([...list, id]);
+            const onSelect = () => {
+              let list = [...selectedItems.keys()];
+              if (allowMultiple) {
+                list = [];
+              }
 
-                const selected = items.filter((item) => newSet.has(item.metadata.pubkey));
-                setSelected(selected);
+              const newSet = isSelected
+                ? new Set(list.filter((item) => item !== id))
+                : new Set([...list, id]);
 
-                if (!allowMultiple) {
-                  confirm();
-                }
-              };
+              const selected = items.filter((item) => newSet.has(item.metadata.pubkey));
+              setSelected(selected);
 
-              return (
-                <ArtCard key={id} pubkey={m.metadata.pubkey} preview={false} onClick={onSelect} />
-              );
-            })}
-          </MetaplexMasonry>
-          {allowMultiple && selectedItems.size > 0 && (
-            <Button type="primary" size="large" onClick={confirm}>
-              Confirm
-            </Button>
-          )}
-        </Space>
+              if (!allowMultiple) {
+                confirm();
+              }
+            };
+
+            return (
+              <ArtCard
+                key={id}
+                pubkey={m.metadata.pubkey}
+                preview={false}
+                onClick={onSelect}
+                className=""
+              />
+            );
+          })}
+        </div>
+        {allowMultiple && selectedItems.size > 0 && (
+          <Button type="primary" size="large" onClick={confirm}>
+            Confirm
+          </Button>
+        )}
+        {/* </Space> */}
       </Modal>
     </>
   );

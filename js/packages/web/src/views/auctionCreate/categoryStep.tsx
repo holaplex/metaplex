@@ -1,4 +1,4 @@
-import { Button, Col, Row, Space } from 'antd';
+import { Button, Space } from 'antd';
 import React from 'react';
 import { AuctionCategory, AuctionState } from '.';
 
@@ -11,7 +11,7 @@ export const CategoryStep = (props: {
   return (
     <Space className="metaplex-fullwidth" direction="vertical">
       <h2>List an NFT</h2>
-      <div className=" space-y-4 max-w-lg">
+      <div className=" max-w-lg space-y-4">
         {[
           {
             cat: AuctionCategory.Single,
