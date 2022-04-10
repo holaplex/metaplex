@@ -1,4 +1,4 @@
-import { LoadingOutlined } from '@ant-design/icons';
+import { InfoCircleFilled, LoadingOutlined } from '@ant-design/icons';
 import {
   AuctionDataExtended,
   AuctionState,
@@ -35,7 +35,18 @@ import Bugsnag from '@bugsnag/browser';
 import { useNavigate } from 'react-router-dom';
 import { AccountLayout, MintLayout } from '@solana/spl-token';
 import { Connection, LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { Button, Card, Col, InputNumber, Row, Space, Spin, Typography, notification } from 'antd';
+import {
+  Button,
+  Card,
+  Col,
+  InputNumber,
+  Row,
+  Space,
+  Spin,
+  Typography,
+  notification,
+  Tooltip,
+} from 'antd';
 import moment from 'moment';
 import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
 import { sendCancelBidOrReclaimItems } from '../../actions/cancelBid';
@@ -347,6 +358,18 @@ export const AuctionCard = ({
       setBidValue(minNextBid);
     }
   }, [minNextBid]);
+
+  useEffect(() => {
+    console.log('auction bid info', {
+      bidValue: value,
+      gapTick,
+      gapTime,
+      gapBidInvalid,
+      minNextBid,
+      tickSizeInvalid,
+      belowMinBid,
+    });
+  }, [value]);
 
   const endInstantSale = async () => {
     setLoading(true);
@@ -980,6 +1003,11 @@ export const AuctionCard = ({
                 ? 'Fixed price'
                 : 'Ends in'}
             </span>
+            {!auctionEnded && !auctionView.isInstantSale && (
+              <Tooltip title={`Gap time: ${gapTime}.\n Gap tick size: ${gapTick}`} className="ml-2">
+                <InfoCircleFilled size={12} />
+              </Tooltip>
+            )}
             {!auctionEnded && !auctionView.isInstantSale && (
               <div>
                 <AuctionCountdown auctionView={auctionView} labels={false} />
