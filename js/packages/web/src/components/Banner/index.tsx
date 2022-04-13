@@ -279,7 +279,7 @@ export const Banner = ({
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <div className="inline-block w-full max-w-md relative pt-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-gray-900 shadow-xl rounded-2xl ">
+                <div className="inline-block w-full max-w-md relative pt-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-base shadow-2xl rounded-2xl ">
                   <XIcon
                     className="text-white h-6 w-6 absolute top-4 right-4 cursor-pointer hover:text-gray-100"
                     onClick={closeModal}
