@@ -26,8 +26,8 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
     UpdatedData,
   }
 
-  const [alerts, setAlerts] = useState(false);
-  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [alertCardActive, setAlertCardActive] = useState(false);
+  const [isEditing, setIsEditing] = useState(true);
   const [showSubscribeAlertMessage, setShowSubscribeAlertMessage] = useState(false);
   const [notificationContainerClass, setNotificationContainerClass] = useState('notificationsContainer');
   const notificationsContainer = useRef<HTMLDivElement>(null);
@@ -37,8 +37,15 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
   const [filterId, setFilterId] = useState<string>('');
   const [emailAddress, setEmailAddress] = useState<string>('');
   const [phoneNumber, setPhoneNumber] = useState<string>('');
-  const [telegramId, setTelegramId] = useState<string>('');
   const [alertId, setAlertId] = useState<string>('');
+  const [stateInAwait, setStateInAwait] = useState(false);
+
+  const { fetchData, logIn, loading, isAuthenticated, createAlert, deleteAlert, createMetaplexAuctionSource } =
+  useNotifiClient({
+    dappAddress: props.dappId,
+    walletPublicKey: props.userWalletAddress ? props.userWalletAddress : '',
+    env: props.env,
+  });
 
   useLayoutEffect(() => {
       const updateSize = () => {
@@ -57,9 +64,18 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
       return () => window.removeEventListener('resize', updateSize);
   }, []);
 
+
   useEffect(() => {
     const doWork = async() => {
       try {
+        console.log(isAuthenticated())
+        if (requestedState == actualState &&
+            requestedState == InternalState.Uninitialized &&
+            !loading) {
+              if (isAuthenticated()){
+                setRequestedState(InternalState.SyncedData)
+              }
+            }
         await advanceToNextActualState()
       } catch (error) {
         console.log("Exception caught: " + error);
@@ -69,18 +85,20 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
     };
 
     doWork();
-  }, [requestedState, actualState]);
-
-  const { fetchData, logIn, isAuthenticated, createAlert, deleteAlert, createMetaplexAuctionSource } =
-  useNotifiClient({
-    dappAddress: props.dappId,
-    walletPublicKey: props.userWalletAddress ? props.userWalletAddress : '',
-    env: props.env,
-  });
+  }, [
+    requestedState,
+    setRequestedState,
+    actualState,
+    setActualState,
+    loading]);
 
   const advanceToNextActualState = async function () {
     console.log("a:" + actualState);
     console.log("r: " + requestedState);
+    if (actualState == requestedState || stateInAwait) {
+      return;
+    }
+
     switch (actualState) {
       case InternalState.Uninitialized:
         if (requestedState > actualState) {
@@ -94,18 +112,24 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
        break;
       case InternalState.SigningInToNotifi:
         if (!isAuthenticated()) {
+          setStateInAwait(true);
           await logIn({signMessage: props.signerCallback});
+          setStateInAwait(false);
         }
         setActualState(InternalState.SignedInToNotifi);
        break;
       case InternalState.SignedInToNotifi: {
+        setStateInAwait(true);
         const {alerts, targetGroups} = await fetchData();
-        
+        setStateInAwait(false);
+
         if (requestedState > InternalState.SignedInToNotifi) {
+        setStateInAwait(true);
           const s = await createMetaplexAuctionSource({
             auctionAddressBase58: props.auctionAddress,
             auctionWebUrl: props.auctionWebUrl
           });
+        setStateInAwait(false);
 
           setSourceId(s.id!);
           const filter = s.applicableFilters.find((it) => {
@@ -127,7 +151,10 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
             });
 
             if (alert) {
+              console.log("Found alertId: " + alert.id!);
               setAlertId(alert.id!);
+              setIsEditing(false);
+              setAlertCardActive(true);
             }
 
             // If there's an alert for this auction, pull out the relevant data
@@ -145,10 +172,6 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
               if (tg.smsTargets && tg.smsTargets.length > 0) {
                 setPhoneNumber(tg.smsTargets[0].phoneNumber!);
               }
-
-              if (tg.telegramTargets && tg.telegramTargets.length > 0) {
-                setTelegramId(tg.telegramTargets[0].telegramId!);
-              }
             }
           }
 
@@ -163,10 +186,13 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
 
         if (requestedState == InternalState.UpdatedData) {
           if (alertId) {
+            setStateInAwait(true);    
             await deleteAlert({alertId});
+            setStateInAwait(false);
             setAlertId('');
           }
 
+          setStateInAwait(true);
           console.log("Creating Notifi Alert");
           const res = await createAlert({
             filterId: filterId,
@@ -175,9 +201,10 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
             name: `Auction: ${props.auctionAddress}`,
             emailAddress: emailAddress === '' ? null : emailAddress,
             phoneNumber: phoneNumber.length < 12 ? null : phoneNumber,
-            telegramId: telegramId,
+            telegramId: null,
             filterOptions: {},
           });
+          setStateInAwait(false);
 
           if (!res) {
             // TODO: Set error state
@@ -195,6 +222,7 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
         // TODO: Add eventing or other possible notifications here.
         // Reset back to idle state
         setRequestedState(InternalState.SyncedData);
+        setActualState(InternalState.SyncedData);
         break;
       default:
         break;
@@ -206,25 +234,23 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
         return;
       }
 
-      setAlerts(e.currentTarget.checked);
-      setIsSubscribed(false);
+      setAlertCardActive(e.currentTarget.checked);
       
       if (e.currentTarget.checked) {
         setRequestedState(InternalState.SyncedData);
       } else {
         if (alertId) {
           deleteAlert({alertId});
+          setAlertId('');
         }
 
         setRequestedState(InternalState.Uninitialized);
       }
-
-      setRequestedState(InternalState.SyncedData);
   };
 
   const subscribe = () => {
+    setIsEditing(false);
     setRequestedState(InternalState.UpdatedData)
-    setIsSubscribed(true);
     setShowSubscribeAlertMessage(true);
     setTimeout(() => {
         setShowSubscribeAlertMessage(false)
@@ -232,8 +258,8 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
   };
 
   const editInfo = () => {
-      setIsSubscribed(false);
-      setShowSubscribeAlertMessage(false);
+    setIsEditing(true);
+    setShowSubscribeAlertMessage(false);
   };
 
   const onEmailAddressChange = (e: React.FormEvent<HTMLInputElement>) => {
@@ -252,10 +278,6 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
     }
   }
 
-  const onTelegramChange = (e: React.FormEvent<HTMLInputElement>) => {
-    setTelegramId(e.currentTarget.value)
-  }
-
   return (
       <div className={notificationContainerClass} ref={notificationsContainer}>
           <div className='getAlertsContainer'>
@@ -264,17 +286,12 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
 
                   <div className='getAlertsToggle'>
                       <label className='getAlertsSwitch'>
-                          <input disabled={!props.isWalletConnected} type="checkbox" onChange={toggleAlerts}/>
+                          <input disabled={!props.isWalletConnected} type="checkbox" checked={alertCardActive && props.isWalletConnected} onChange={toggleAlerts}/>
                           <span className='getAlertsSwitchSlider'/>
                       </label>
                   </div>
 
-                  {isSubscribed && <div className='subscribedSettings'>
-                      <div className='subscribedSettingsButton'>
-                          <img alt="settings" src="/img/settings.png" />
-                      </div>
-                  </div>}
-                  {(showSubscribeAlertMessage && isSubscribed) && <div className='subscribedAlert'>
+                  {(showSubscribeAlertMessage && alertId) && <div className='subscribedAlert'>
                       <img alt="check" src="/img/check-icon.png" />
                       <span>You’re subscribed for alerts </span>
                   </div>}
@@ -286,37 +303,29 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
               </div>
           </div>
 
-          {alerts && <div className='subscribeContainer'>
+          {alertCardActive && props.isWalletConnected && <div className='subscribeContainer'>
               <div className='subscribeInput'>
                   <div className='subscribeInputContainer'>
                       <img alt="email" src="/img/email-logo.png"/>
-                      <input onChange={onEmailAddressChange} type="email" placeholder="Email address" value={emailAddress} className={isSubscribed ? 'ant-input-number-input' : ''} readOnly={isSubscribed}/>
+                      <input onChange={onEmailAddressChange} type="email" placeholder="Email address" value={emailAddress} className={!isEditing ? 'subscribedInput' : ''} readOnly={!isEditing}/>
                   </div>
               </div>
 
               <div className='subscribeInput'>
                   <div className='subscribeInputContainer'>
-                      <img alt="phone" src="/img/mobile-logo.png"/>
-                      <input onChange={onPhoneNumberChange} type="tel" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="Phone number" value={phoneNumber} className={isSubscribed ? 'subscribedInput' : ''} readOnly={isSubscribed}/>
+                      <img alt="phone" src="/img/mobile-logo.png" title="US phone numbers only. eg: +15551112222"/>
+                      <input onChange={onPhoneNumberChange} type="tel" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" placeholder="Phone number" title="US phone numbers only. eg: +15551112222" value={phoneNumber} className={!isEditing ? 'subscribedInput' : ''} readOnly={!isEditing}/>
                   </div>
               </div>
 
-              <div className='subscribeInput'>
-                  <div className='subscribeInputContainer'>
-                      <img alt="telegram" src="/img/telegram-logo.png"/>
-                      <input onChange={onTelegramChange} type="text" placeholder="Coming Soon!" className={isSubscribed ? 'subscribedInput' : ''} readOnly={true}/>
-                  </div>
-              </div>
-
-              {!isSubscribed && <div className='subscribeButton'>
+              {(!alertId || isEditing) && <div className='subscribeButton'>
                   <button onClick={subscribe}>Subscribe</button>
               </div>}
 
-              {isSubscribed && <div className='editButton'>
+              {alertId && !isEditing && <div className='editButton'>
                   <button type="submit" onClick={editInfo}>Edit Info</button>
               </div>}
           </div>}
-
       </div>
   )
 };
