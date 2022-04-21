@@ -1,5 +1,5 @@
 import React, { FC, useEffect, useLayoutEffect, useRef, useState } from 'react';
-
+import { Button } from 'antd';
 import { BlockchainEnvironment, useNotifiClient } from '@notifi-network/notifi-react-hooks';
 
 interface AuctionAlertSetupProps {
@@ -234,14 +234,14 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
     }
   };
 
-  const toggleAlerts = (e: React.FormEvent<HTMLInputElement>) => {
+  const toggleAlerts = (turnOn: boolean) => {
     if (requestedState != actualState) {
       return;
     }
 
-    setAlertCardActive(e.currentTarget.checked);
+    setAlertCardActive(turnOn);
 
-    if (e.currentTarget.checked) {
+    if (!turnOn) {
       setRequestedState(InternalState.SyncedData);
     } else {
       if (alertId) {
@@ -251,6 +251,27 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
 
       setRequestedState(InternalState.Uninitialized);
     }
+  };
+
+  const enableAlerts = () => {
+    if (requestedState != actualState) {
+      return;
+    }
+    if (alertId) {
+      deleteAlert({ alertId });
+      setAlertId('');
+    }
+
+    setRequestedState(InternalState.Uninitialized);
+  };
+
+  const disableAlerts = () => {
+    if (requestedState != actualState) {
+      return;
+    }
+    setAlertCardActive(true);
+    setRequestedState(InternalState.SyncedData);
+    setAlertCardActive(false);
   };
 
   const subscribe = () => {
@@ -284,22 +305,26 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
   };
 
   return (
-    <div className={notificationContainerClass} ref={notificationsContainer}>
-      <div className="getAlertsContainer">
-        <div className="getAlertsToggleContainer">
-          <span className="ant-card-head-title">Get Auction and Bid Alerts</span>
-
-          <div className="getAlertsToggle">
-            <label className="getAlertsSwitch">
-              <input
-                disabled={!props.isWalletConnected}
-                type="checkbox"
-                checked={alertCardActive && props.isWalletConnected}
-                onChange={toggleAlerts}
-              />
-              <span className="getAlertsSwitchSlider" />
-            </label>
-          </div>
+    <div className={''} ref={notificationsContainer}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center">
+          {!alertCardActive ? (
+            <Button
+              type="default"
+              onClick={() => toggleAlerts(true)}
+              disabled={!props.isWalletConnected}
+            >
+              Get Auction and Bid Alerts
+            </Button>
+          ) : (
+            <Button
+              type="link"
+              onClick={() => toggleAlerts(false)}
+              disabled={!props.isWalletConnected || !alertId}
+            >
+              Cancel alerts
+            </Button>
+          )}
 
           {showSubscribeAlertMessage && alertId && (
             <div className="subscribedAlert">
@@ -309,61 +334,69 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
           )}
         </div>
 
-        <div className="getAlertsPoweredBy">
-          <span className="getAlertsPoweredByText">Powered by</span>
-          <img alt="Powered by Logo" src="/img/logo.png" />
-        </div>
+        <a
+          href="https://github.com/notifi-network/notifi-sdk-ts"
+          target={'_blank'}
+          rel="noreferrer"
+        >
+          <div className="getAlertsPoweredBy">
+            <span className="getAlertsPoweredByText">Powered by</span>
+            <img alt="Powered by Notify" src="/img/notifyLogo.png" />
+          </div>
+        </a>
       </div>
 
       {alertCardActive && props.isWalletConnected && (
         <div className="subscribeContainer">
-          <div className="subscribeInput">
-            <div className="subscribeInputContainer">
-              <img alt="email" src="/img/email-logo.png" />
-              <input
-                onChange={onEmailAddressChange}
-                type="email"
-                placeholder="Email address"
-                value={emailAddress}
-                className={!isEditing ? 'subscribedInput' : ''}
-                readOnly={!isEditing}
-              />
+          <div className="flex w-full flex-wrap justify-between">
+            <div className="subscribeInput">
+              <div className="subscribeInputContainer">
+                <img alt="email" src="/img/email-logo.png" />
+                <input
+                  onChange={onEmailAddressChange}
+                  type="email"
+                  placeholder="Email address"
+                  value={emailAddress}
+                  className={!isEditing ? 'subscribedInput   ' : ''}
+                  readOnly={!isEditing}
+                />
+              </div>
+            </div>
+
+            <div className="subscribeInput">
+              <div className="subscribeInputContainer">
+                <img
+                  alt="phone"
+                  src="/img/mobile-logo.png"
+                  title="US phone numbers only. eg: +15551112222"
+                />
+                <input
+                  onChange={onPhoneNumberChange}
+                  type="tel"
+                  pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+                  placeholder="Phone number"
+                  title="US phone numbers only. eg: +15551112222"
+                  value={phoneNumber}
+                  className={!isEditing ? 'subscribedInput   ' : ''}
+                  readOnly={!isEditing}
+                />
+              </div>
             </div>
           </div>
-
-          <div className="subscribeInput">
-            <div className="subscribeInputContainer">
-              <img
-                alt="phone"
-                src="/img/mobile-logo.png"
-                title="US phone numbers only. eg: +15551112222"
-              />
-              <input
-                onChange={onPhoneNumberChange}
-                type="tel"
-                pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
-                placeholder="Phone number"
-                title="US phone numbers only. eg: +15551112222"
-                value={phoneNumber}
-                className={!isEditing ? 'subscribedInput' : ''}
-                readOnly={!isEditing}
-              />
-            </div>
-          </div>
-
-          {(!alertId || isEditing) && (
-            <div className="subscribeButton">
-              <button onClick={subscribe}>Subscribe</button>
-            </div>
-          )}
-
-          {alertId && !isEditing && (
-            <div className="editButton">
-              <button type="submit" onClick={editInfo}>
-                Edit Info
-              </button>
-            </div>
-          )}
+        </div>
+      )}
+      <div>
+        {(!alertId || isEditing) && alertCardActive && (
+          <Button type="primary" className="mt-8 w-full" onClick={subscribe}>
+            Subscribe
+          </Button>
+        )}
+      </div>
+      {alertId && !isEditing && alertCardActive && (
+        <div className="editButton">
+          <button type="submit" onClick={editInfo}>
+            Edit Info
+          </button>
         </div>
       )}
     </div>

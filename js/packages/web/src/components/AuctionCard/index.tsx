@@ -1078,34 +1078,33 @@ export const AuctionCard = ({
         )}
       </Card>
 
-      {!auctionEnded && (
+      {!auctionEnded && location && (
         <Card
+          // bodyStyle={{ padding: 0 }}
           bordered={false}
-          className="metaplex-margin-bottom-4 auction-card"
+          className="metaplex-margin-bottom-4"
           title={'Notifications'}
         >
-          {location && (
-            <AuctionAlertSetup
-              env={
-                connectionConfig.env == 'devnet'
-                  ? BlockchainEnvironment.DevNet
-                  : BlockchainEnvironment.MainNetBeta
+          <AuctionAlertSetup
+            env={
+              connectionConfig.env == 'devnet'
+                ? BlockchainEnvironment.DevNet
+                : BlockchainEnvironment.MainNetBeta
+            }
+            dappId={`${programIds().metaplex}.Holaplex`}
+            storeName={storefront.subdomain}
+            auctionAddress={auctionView.auction.pubkey}
+            auctionWebUrl={location}
+            isWalletConnected={wallet.connected}
+            signerCallback={async (m) => {
+              const res = await adapter(m)!;
+              if (res == undefined) {
+                return new Uint8Array();
               }
-              dappId={`${programIds().metaplex}.Holaplex`}
-              storeName={storefront.subdomain}
-              auctionAddress={auctionView.auction.pubkey}
-              auctionWebUrl={location}
-              isWalletConnected={wallet.connected}
-              signerCallback={async (m) => {
-                const res = await adapter(m)!;
-                if (res == undefined) {
-                  return new Uint8Array();
-                }
-                return res!;
-              }}
-              userWalletAddress={wallet ? wallet.publicKey?.toBase58() : undefined}
-            />
-          )}
+              return res!;
+            }}
+            userWalletAddress={wallet ? wallet.publicKey?.toBase58() : undefined}
+          />
         </Card>
       )}
 
