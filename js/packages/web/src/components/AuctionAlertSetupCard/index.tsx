@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import { Button } from 'antd';
 import { BlockchainEnvironment, useNotifiClient } from '@notifi-network/notifi-react-hooks';
 
@@ -13,6 +13,15 @@ interface AuctionAlertSetupProps {
   signerCallback: (message: Uint8Array) => Promise<Uint8Array>;
 }
 
+const NotifyEnums = {
+  0: 'Uninitialized',
+  1: 'Initialized',
+  2: 'SigningInToNotifi',
+  3: 'SignedInToNotifi',
+  4: 'SyncedData',
+  5: 'UpdatedData',
+};
+
 const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupProps) => {
   enum InternalState {
     Uninitialized,
@@ -26,8 +35,7 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
   const [alertCardActive, setAlertCardActive] = useState(false);
   const [isEditing, setIsEditing] = useState(true);
   const [showSubscribeAlertMessage, setShowSubscribeAlertMessage] = useState(false);
-  const [notificationContainerClass, setNotificationContainerClass] =
-    useState('notificationsContainer');
+
   const notificationsContainer = useRef<HTMLDivElement>(null);
   const [requestedState, setRequestedState] = useState<InternalState>(InternalState.Uninitialized);
   const [actualState, setActualState] = useState<InternalState>(InternalState.Uninitialized);
@@ -52,31 +60,10 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
     env: props.env,
   });
 
-  useLayoutEffect(() => {
-    const updateSize = () => {
-      if (notificationsContainer.current) {
-        const containerWidth = notificationsContainer.current.offsetWidth;
-        const widthClass =
-          containerWidth <= 400
-            ? 'ant-card-body notificationsContainerSm'
-            : containerWidth <= 680
-            ? 'ant-card-body notificationsContainerMd'
-            : containerWidth <= 1100
-            ? 'ant-card-body notificationsContainerLg'
-            : 'ant-card-body';
-        setNotificationContainerClass(widthClass);
-      }
-    };
-
-    window.addEventListener('resize', updateSize);
-    updateSize();
-    return () => window.removeEventListener('resize', updateSize);
-  }, []);
-
   useEffect(() => {
     const doWork = async () => {
       try {
-        console.log(isAuthenticated());
+        console.log('notify isAuthenticated', isAuthenticated());
         if (
           requestedState == actualState &&
           requestedState == InternalState.Uninitialized &&
@@ -98,8 +85,8 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
   }, [requestedState, setRequestedState, actualState, setActualState, loading]);
 
   const advanceToNextActualState = async function () {
-    console.log('a:' + actualState);
-    console.log('r: ' + requestedState);
+    console.log('a:' + NotifyEnums[actualState]);
+    console.log('r: ' + NotifyEnums[requestedState]);
     if (actualState == requestedState || stateInAwait) {
       return;
     }
@@ -326,7 +313,7 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
 
       {alertCardActive && props.isWalletConnected && (
         <div className="">
-          <div className="flex w-full flex-wrap justify-between font-theme-title">
+          <div className="flex w-full flex-wrap items-center justify-between font-theme-title">
             <div className="mt-4 w-full lg:max-w-xs">
               <div className="flex justify-between ">
                 <label
@@ -343,17 +330,16 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
                   id="email"
                   onChange={onEmailAddressChange}
                   value={emailAddress}
-                  className="block w-full rounded-md border-color-text bg-transparent text-color-text shadow-sm placeholder:text-color-text focus:border-primary focus:ring-primary sm:text-sm"
+                  className="block w-full rounded-md border-color-text bg-transparent text-color-text shadow-sm placeholder:text-color-text placeholder:opacity-50 focus:border-primary focus:ring-primary sm:text-sm"
                   placeholder="you@example.com"
                   aria-describedby="email"
                 />
               </div>
             </div>
-
             <div className="mt-4 w-full lg:max-w-xs">
               <div className="flex justify-between">
                 <label htmlFor="phone" className="block text-sm font-medium text-primary">
-                  US Phone number
+                  Phone number
                 </label>
                 <span className="text-sm text-color-text" id="phone">
                   Optional
@@ -366,7 +352,7 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
                   onChange={onPhoneNumberChange}
                   name="phone"
                   id="phone"
-                  className="block w-full rounded-md border-color-text bg-transparent  text-color-text shadow-sm placeholder:text-color-text focus:border-primary focus:ring-primary sm:text-sm"
+                  className="block w-full rounded-md border-color-text bg-transparent  text-color-text shadow-sm placeholder:text-color-text placeholder:opacity-50 focus:border-primary focus:ring-primary sm:text-sm"
                   placeholder="+15551112222"
                   aria-describedby="phone"
                 />
@@ -378,9 +364,9 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
               <Button
                 type="primary"
                 htmlType="submit"
-                disabled={!emailAddress && !phoneNumber}
+                disabled={(!emailAddress && !phoneNumber) || loading}
                 className="mt-8 w-full"
-                onClick={subscribe}
+                onClick={() => subscribe()}
               >
                 Subscribe
               </Button>

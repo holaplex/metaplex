@@ -940,8 +940,6 @@ export const AuctionCard = ({
 
   const showConnectToBidBtn = !hideDefaultAction && !wallet.connected;
 
-  const connectionConfig = useConnectionConfig();
-
   // Show the refund/reclaim/reedem bid button
   const showRedeemReclaimRefundBtn =
     showPlaceBidUI &&
@@ -957,21 +955,8 @@ export const AuctionCard = ({
 
   const duringAuctionNotConnected = !auctionEnded && !wallet.connected;
 
-  const location = window === undefined ? undefined : window.location.href;
-  const adapter = async (message: Uint8Array) => {
-    if (!wallet.signMessage) {
-      return new Uint8Array();
-    }
-
-    const signed = await wallet.signMessage(message);
-    // Sollet Adapter signMessage returns Uint8Array
-    if (signed instanceof Uint8Array) {
-      return signed;
-    }
-  };
-
   return (
-    <div>
+    <>
       <Card
         bordered={false}
         className="metaplex-margin-bottom-4 auction-card"
@@ -1078,36 +1063,6 @@ export const AuctionCard = ({
         )}
       </Card>
 
-      {!auctionEnded && location && (
-        <Card
-          // bodyStyle={{ padding: 0 }}
-          bordered={false}
-          className="metaplex-margin-bottom-4"
-          title={'Notifications'}
-        >
-          <AuctionAlertSetup
-            env={
-              connectionConfig.env == 'devnet'
-                ? BlockchainEnvironment.DevNet
-                : BlockchainEnvironment.MainNetBeta
-            }
-            dappId={`${programIds().metaplex}.Holaplex`}
-            storeName={storefront.subdomain}
-            auctionAddress={auctionView.auction.pubkey}
-            auctionWebUrl={location}
-            isWalletConnected={wallet.connected}
-            signerCallback={async (m) => {
-              const res = await adapter(m)!;
-              if (res == undefined) {
-                return new Uint8Array();
-              }
-              return res!;
-            }}
-            userWalletAddress={wallet ? wallet.publicKey?.toBase58() : undefined}
-          />
-        </Card>
-      )}
-
       <MetaplexModal visible={showWarningModal} onCancel={() => setShowWarningModal(false)}>
         <h3>
           Warning: There may be some items in this auction that still are required by the auction
@@ -1117,7 +1072,7 @@ export const AuctionCard = ({
           for them right now.
         </h3>
       </MetaplexModal>
-    </div>
+    </>
   );
 };
 
