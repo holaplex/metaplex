@@ -309,25 +309,15 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
               Cancel alerts
             </Button>
           )}
-
-          {showSubscribeAlertMessage && alertId && (
-            <div className="flex items-center font-theme-text text-2xl font-medium text-primary">
-              {/* <img alt="check" src="/img/check-icon.png" /> */}
-              <span>You&nsb;re subscribed for alerts!</span>
-            </div>
-          )}
         </div>
-        <div className="flex items-center font-theme-text text-2xl font-medium text-primary">
-          {/* <img alt="check" src="/img/check-icon.png" /> */}
-          <span>You&apos;re subscribed for alerts!</span>
-        </div>
+        {showSubscribeAlertMessage && alertId && (
+          <div className="flex items-center font-theme-text text-2xl font-medium text-primary">
+            <span>You&apos;re subscribed for alerts!</span>
+          </div>
+        )}
 
-        <a
-          href="https://github.com/notifi-network/notifi-sdk-ts"
-          target={'_blank'}
-          rel="noreferrer"
-        >
-          <div className="getAlertsPoweredBy">
+        <a href="https://dev.notifi.network/" target={'_blank'} rel="noreferrer">
+          <div className="flex items-center ">
             <span className="getAlertsPoweredByText">Powered by</span>
             <img alt="Powered by Notify" src="/img/notifyLogo.png" />
           </div>
@@ -362,38 +352,46 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
 
             <div className="mt-4 w-full lg:max-w-xs">
               <div className="flex justify-between">
-                <label htmlFor="email" className="block text-sm font-medium text-primary">
+                <label htmlFor="phone" className="block text-sm font-medium text-primary">
                   US Phone number
                 </label>
-                <span className="text-sm text-color-text" id="email-optional">
+                <span className="text-sm text-color-text" id="phone">
                   Optional
                 </span>
               </div>
               <div className="mt-1 font-theme-text ">
                 <input
                   type="tel"
+                  value={phoneNumber}
+                  onChange={onPhoneNumberChange}
                   name="phone"
                   id="phone"
                   className="block w-full rounded-md border-color-text bg-transparent  text-color-text shadow-sm placeholder:text-color-text focus:border-primary focus:ring-primary sm:text-sm"
                   placeholder="+15551112222"
-                  aria-describedby="phone-optional"
+                  aria-describedby="phone"
                 />
               </div>
             </div>
           </div>
           <div>
             {(!alertId || isEditing) && alertCardActive && (
-              <Button type="primary" className="mt-8 w-full" onClick={subscribe}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                disabled={!emailAddress && !phoneNumber}
+                className="mt-8 w-full"
+                onClick={subscribe}
+              >
                 Subscribe
               </Button>
             )}
           </div>
-          {alertId && !isEditing && alertCardActive && (
-            <Button type="primary" className="mt-8 w-full" onClick={editInfo}>
-              Edit Info
-            </Button>
-          )}
         </div>
+      )}
+      {alertId && !isEditing && props.isWalletConnected && (
+        <Button type="primary" htmlType="submit" className="mt-8 w-full" onClick={editInfo}>
+          Edit Info
+        </Button>
       )}
     </div>
   );
