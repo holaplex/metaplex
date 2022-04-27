@@ -21,6 +21,7 @@ import {
   shortenAddress,
   Storefront,
   useConnection,
+  useConnectionConfig,
   useMint,
   useStore,
   useUserAccounts,
@@ -62,6 +63,8 @@ import { endSale } from './utils/endSale';
 import { DateTime } from 'luxon';
 import { ChevronRightIcon } from '@heroicons/react/solid';
 import { CrossMintButton } from '@crossmint/client-sdk-react-ui';
+import AuctionAlertSetup from '../AuctionAlertSetupCard';
+import { BlockchainEnvironment } from '@notifi-network/notifi-react-hooks';
 
 const { Text } = Typography;
 
@@ -294,7 +297,7 @@ export const AuctionCard = ({
       : (minBid + fromLamports(tickSize)).toFixed(2)
   );
 
-  const [value, setValue] = useState<number>(minBid);
+  const [value, setBidValue] = useState<number>(minBid);
   const [triedToBid, setTriedToBid] = useState(false);
   const gapTime = (auctionView.auction.info.auctionGap?.toNumber() || 0) / 60;
   const gapTick = auctionExtended ? auctionExtended.info.gapTickSizePercentage : 0;
@@ -344,7 +347,7 @@ export const AuctionCard = ({
   useEffect(() => {
     // Sets the bid input field to the minimum bid automatically
     if (minNextBid > value) {
-      setValue(minNextBid);
+      setBidValue(minNextBid);
     }
   }, [minNextBid]);
 
@@ -806,7 +809,7 @@ export const AuctionCard = ({
             step={minNextBid}
             autoFocus
             value={value}
-            onChange={(v) => setValue(v)}
+            onChange={(v) => setBidValue(v)}
             precision={2}
             formatter={(value) => (value ? `◎ ${value}` : '')}
             placeholder={`Bid ${minNextBid} SOL or more`}
@@ -953,7 +956,7 @@ export const AuctionCard = ({
   const duringAuctionNotConnected = !auctionEnded && !wallet.connected;
 
   return (
-    <div>
+    <>
       <Card
         bordered={false}
         className="metaplex-margin-bottom-4 auction-card"
@@ -1001,7 +1004,7 @@ export const AuctionCard = ({
             {/* todo: reduce opacity if starting bid */}
             <div className={cx('flex items-center text-xl')}>
               <svg
-                className="stroke-color-text mx-[5px] h-4 w-4 opacity-75"
+                className="mx-[5px] h-4 w-4 stroke-color-text opacity-75"
                 viewBox="0 0 16 16"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
@@ -1069,7 +1072,7 @@ export const AuctionCard = ({
           for them right now.
         </h3>
       </MetaplexModal>
-    </div>
+    </>
   );
 };
 
@@ -1086,14 +1089,14 @@ const WinnerProfile = ({ bidderPubkey }: { handle?: string; bidderPubkey: string
           <div className="flex-shrink-0 pr-4">
             <Identicon size={48} address={bidderPubkey} />
           </div>
-          <div className="group-hover:text-primary text-color-text flex min-w-0 flex-1 justify-between">
+          <div className="flex min-w-0 flex-1 justify-between text-color-text group-hover:text-primary">
             <div className="text-color-text">
-              <p className=" group-hover:text-primary  text-color-text flex items-center  truncate font-medium">
+              <p className=" flex  items-center truncate font-medium  text-color-text group-hover:text-primary">
                 {bidderTwitterHandle ? '@' + bidderTwitterHandle : shortenAddress(bidderPubkey)}
               </p>
             </div>
           </div>
-          <div className="group-hover:text-primary text-color-text flex items-center">
+          <div className="flex items-center text-color-text group-hover:text-primary">
             <span className="block">View profile</span>
             <ChevronRightIcon className="h-5 w-5" viewBox="0 0 18 18" aria-hidden="true" />
           </div>

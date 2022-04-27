@@ -14,6 +14,9 @@ import {
   VAULT_ID,
   processVaultData,
   getTwitterHandle,
+  useConnectionConfig,
+  useStore,
+  programIds,
 } from '@oyster/common';
 import { actions } from '@metaplex/js';
 import { PublicKey } from '@solana/web3.js';
@@ -42,6 +45,8 @@ import useWindowDimensions from '../../utils/layout';
 import { Card } from 'antd';
 import BidLine from './BidLine';
 import { useAnalytics } from '../../contexts';
+import AuctionAlertSetup from '../../components/AuctionAlertSetupCard';
+import { BlockchainEnvironment } from '@notifi-network/notifi-react-hooks';
 
 export const AuctionItem = ({ item, active }: { item: AuctionViewItem; active?: boolean }) => {
   const id = item.metadata.pubkey;
@@ -65,6 +70,22 @@ export const AuctionView = () => {
   const art = useArt(auction?.thumbnail?.metadata?.pubkey);
   const { ref, data } = useExtendedArt(auction?.thumbnail?.metadata?.pubkey);
   const creators = useCreators(auction);
+  const connectionConfig = useConnectionConfig();
+  const { storefront } = useStore();
+  const location = window === undefined ? undefined : window.location.href;
+
+  const adapter = async (message: Uint8Array) => {
+    if (!wallet.signMessage) {
+      return new Uint8Array();
+    }
+
+    const signed = await wallet.signMessage(message);
+    // Sollet Adapter signMessage returns Uint8Array
+    if (signed instanceof Uint8Array) {
+      return signed;
+    }
+  };
+
   const wallet = useWallet();
   let edition = '';
   if (art.type === ArtType.NFT) {
@@ -249,6 +270,35 @@ export const AuctionView = () => {
               artTitle={art.title}
               artImage={data?.image}
             />
+          )}
+          {auction && location && (
+            <Card
+              // bodyStyle={{ padding: 0 }}
+              bordered={false}
+              className="metaplex-margin-bottom-4 auction-card "
+              title={'Notifications'}
+            >
+              <AuctionAlertSetup
+                env={
+                  connectionConfig.env == 'devnet'
+                    ? BlockchainEnvironment.DevNet
+                    : BlockchainEnvironment.MainNetBeta
+                }
+                dappId={`${programIds().metaplex}.Holaplex`}
+                storeName={storefront.subdomain}
+                auctionAddress={auction.auction.pubkey}
+                auctionWebUrl={location}
+                isWalletConnected={wallet.connected}
+                signerCallback={async (m) => {
+                  const res = await adapter(m)!;
+                  if (res == undefined) {
+                    return new Uint8Array();
+                  }
+                  return res!;
+                }}
+                userWalletAddress={wallet ? wallet.publicKey?.toBase58() : undefined}
+              />
+            </Card>
           )}
         </div>
         {!auction?.isInstantSale && <AuctionBids auctionView={auction} />}

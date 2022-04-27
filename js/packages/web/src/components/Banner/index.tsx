@@ -44,7 +44,7 @@ export const Banner = ({
   }
 
   const FollowButton = () => (
-    <button className="flex items-center  justify-center rounded-full !bg-white !px-6 !py-2 font-sans !text-base !font-medium !text-gray-900  transition-all hover:!bg-gray-100 hover:!text-gray-700">
+    <button className="flex   items-center justify-center transition-all rounded-full !bg-primary !px-6 !py-2 !text-base !font-medium  !text-gray-900  hover:!bg-primary-hover !text-color-text-accent !font-theme-title">
       Follow
     </button>
   );
@@ -264,7 +264,7 @@ export const Banner = ({
                 leaveFrom="opacity-100"
                 leaveTo="opacity-0"
               >
-                <Dialog.Overlay className="fixed inset-0" />
+                <Dialog.Overlay className="fixed inset-0 bg-gray-800 bg-opacity-40 backdrop-blur-lg" />
               </Transition.Child>
               {/* This element is to trick the browser into centering the modal contents. */}
               <span className="inline-block h-screen align-middle" aria-hidden="true">
@@ -279,7 +279,7 @@ export const Banner = ({
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <div className="relative my-8 inline-block w-full max-w-md transform overflow-hidden rounded-2xl bg-gray-900 pt-6 text-left align-middle shadow-xl transition-all ">
+                <div className="inline-block w-full max-w-md relative pt-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-base shadow-xl rounded-2xl ">
                   <XIcon
                     className="absolute top-4 right-4 h-6 w-6 cursor-pointer text-white hover:text-gray-100"
                     onClick={closeModal}
