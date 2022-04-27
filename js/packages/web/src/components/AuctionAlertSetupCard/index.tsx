@@ -234,44 +234,27 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
     }
   };
 
-  const toggleAlerts = (turnOn: boolean) => {
+  const enableAlertsForm = () => {
     if (requestedState != actualState) {
       return;
     }
 
-    setAlertCardActive(turnOn);
-
-    if (!turnOn) {
-      setRequestedState(InternalState.SyncedData);
-    } else {
-      if (alertId) {
-        deleteAlert({ alertId });
-        setAlertId('');
-      }
-
-      setRequestedState(InternalState.Uninitialized);
-    }
-  };
-
-  const enableAlerts = () => {
-    if (requestedState != actualState) {
-      return;
-    }
-    if (alertId) {
-      deleteAlert({ alertId });
-      setAlertId('');
-    }
-
-    setRequestedState(InternalState.Uninitialized);
+    setRequestedState(InternalState.SyncedData);
+    setAlertCardActive(true);
   };
 
   const disableAlerts = () => {
     if (requestedState != actualState) {
       return;
     }
-    setAlertCardActive(true);
-    setRequestedState(InternalState.SyncedData);
+
     setAlertCardActive(false);
+
+    if (alertId) {
+      deleteAlert({ alertId });
+      setAlertId('');
+    }
+    setRequestedState(InternalState.Uninitialized);
   };
 
   const subscribe = () => {
@@ -308,18 +291,19 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
     <div className={''} ref={notificationsContainer}>
       <div className="flex items-center justify-between">
         <div className="flex items-center">
-          {!alertCardActive ? (
+          {!alertCardActive || !props.isWalletConnected ? (
             <Button
               type="default"
-              onClick={() => toggleAlerts(true)}
+              onClick={() => enableAlertsForm()}
               disabled={!props.isWalletConnected}
             >
-              Get Auction and Bid Alerts
+              {!props.isWalletConnected ? 'Connect to get ' : 'Get '} Auction and Bid Alerts
             </Button>
           ) : (
             <Button
               type="link"
-              onClick={() => toggleAlerts(false)}
+              onClick={() => disableAlerts()}
+              className="!p-0"
               disabled={!props.isWalletConnected || !alertId}
             >
               Cancel alerts
@@ -327,11 +311,15 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
           )}
 
           {showSubscribeAlertMessage && alertId && (
-            <div className="subscribedAlert">
-              <img alt="check" src="/img/check-icon.png" />
-              <span>You’re subscribed for alerts </span>
+            <div className="flex items-center font-theme-text text-2xl font-medium text-primary">
+              {/* <img alt="check" src="/img/check-icon.png" /> */}
+              <span>You&nsb;re subscribed for alerts!</span>
             </div>
           )}
+        </div>
+        <div className="flex items-center font-theme-text text-2xl font-medium text-primary">
+          {/* <img alt="check" src="/img/check-icon.png" /> */}
+          <span>You&apos;re subscribed for alerts!</span>
         </div>
 
         <a
@@ -347,56 +335,64 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
       </div>
 
       {alertCardActive && props.isWalletConnected && (
-        <div className="subscribeContainer">
-          <div className="flex w-full flex-wrap justify-between">
-            <div className="subscribeInput">
-              <div className="subscribeInputContainer">
-                <img alt="email" src="/img/email-logo.png" />
+        <div className="">
+          <div className="flex w-full flex-wrap justify-between font-theme-title">
+            <div className="mt-4 w-full lg:max-w-xs">
+              <div className="flex justify-between ">
+                <label
+                  htmlFor="email"
+                  className="block font-theme-title text-sm font-medium text-primary"
+                >
+                  Email
+                </label>
+              </div>
+              <div className="mt-1">
                 <input
-                  onChange={onEmailAddressChange}
                   type="email"
-                  placeholder="Email address"
+                  name="email"
+                  id="email"
+                  onChange={onEmailAddressChange}
                   value={emailAddress}
-                  className={!isEditing ? 'subscribedInput   ' : ''}
-                  readOnly={!isEditing}
+                  className="block w-full rounded-md border-color-text bg-transparent text-color-text shadow-sm placeholder:text-color-text focus:border-primary focus:ring-primary sm:text-sm"
+                  placeholder="you@example.com"
+                  aria-describedby="email"
                 />
               </div>
             </div>
 
-            <div className="subscribeInput">
-              <div className="subscribeInputContainer">
-                <img
-                  alt="phone"
-                  src="/img/mobile-logo.png"
-                  title="US phone numbers only. eg: +15551112222"
-                />
+            <div className="mt-4 w-full lg:max-w-xs">
+              <div className="flex justify-between">
+                <label htmlFor="email" className="block text-sm font-medium text-primary">
+                  US Phone number
+                </label>
+                <span className="text-sm text-color-text" id="email-optional">
+                  Optional
+                </span>
+              </div>
+              <div className="mt-1 font-theme-text ">
                 <input
-                  onChange={onPhoneNumberChange}
                   type="tel"
-                  pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
-                  placeholder="Phone number"
-                  title="US phone numbers only. eg: +15551112222"
-                  value={phoneNumber}
-                  className={!isEditing ? 'subscribedInput   ' : ''}
-                  readOnly={!isEditing}
+                  name="phone"
+                  id="phone"
+                  className="block w-full rounded-md border-color-text bg-transparent  text-color-text shadow-sm placeholder:text-color-text focus:border-primary focus:ring-primary sm:text-sm"
+                  placeholder="+15551112222"
+                  aria-describedby="phone-optional"
                 />
               </div>
             </div>
           </div>
-        </div>
-      )}
-      <div>
-        {(!alertId || isEditing) && alertCardActive && (
-          <Button type="primary" className="mt-8 w-full" onClick={subscribe}>
-            Subscribe
-          </Button>
-        )}
-      </div>
-      {alertId && !isEditing && alertCardActive && (
-        <div className="editButton">
-          <button type="submit" onClick={editInfo}>
-            Edit Info
-          </button>
+          <div>
+            {(!alertId || isEditing) && alertCardActive && (
+              <Button type="primary" className="mt-8 w-full" onClick={subscribe}>
+                Subscribe
+              </Button>
+            )}
+          </div>
+          {alertId && !isEditing && alertCardActive && (
+            <Button type="primary" className="mt-8 w-full" onClick={editInfo}>
+              Edit Info
+            </Button>
+          )}
         </div>
       )}
     </div>
