@@ -81,7 +81,7 @@ export const InstantSaleStep = ({
           </Select>
           {availableSupply > 0 && (
             <>
-              <span>Each copy will be given unique edition number e.g. 1 of 30</span>
+              <span>Each copy will be given unique edition number e.g. 1 of 10</span>
               <Input
                 autoFocus
                 placeholder="Enter number of copies sold"
@@ -93,6 +93,12 @@ export const InstantSaleStep = ({
                   if (editions > availableSupply) {
                     setEditionError(
                       `The NFT can only generate ${availableSupply} more editions. Please lower the copy count.`
+                    );
+                    return;
+                  }
+                  if (editions > 10) {
+                    setEditionError(
+                      `The on-chain program can only sell 10 editions at a time. Please lower the copy count.`
                     );
                     return;
                   }

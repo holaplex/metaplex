@@ -303,7 +303,7 @@ const AuctionAlertSetup: FC<AuctionAlertSetupProps> = (props: AuctionAlertSetupP
           </div>
         )}
 
-        <a href="https://dev.notifi.network/" target={'_blank'} rel="noreferrer">
+        <a href="https://www.notifi.network/" target={'_blank'} rel="noreferrer">
           <div className="flex items-center ">
             <span className="getAlertsPoweredByText">Powered by</span>
             <img alt="Powered by Notify" src="/img/notifyLogo.png" />
