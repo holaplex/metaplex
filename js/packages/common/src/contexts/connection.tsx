@@ -48,7 +48,7 @@ export type ENV =
 export const ENDPOINTS: { name: ENV; endpoint: string; ChainId: ChainId }[] = [
   {
     name: 'mainnet-beta (Triton)',
-    endpoint: 'https://holaplex.rpcpool.com',
+    endpoint: 'https://holaplex-main-9e4a.mainnet.rpcpool.com/a29b8b6c-bc0c-4c42-a440-705369384e1d',
     ChainId: ChainId.MainnetBeta,
   },
   {
