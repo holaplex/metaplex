@@ -1,4 +1,4 @@
-# Revive your old Holaplex Storefront
+# Revive your OG Holaplex Storefront
 
 ## Prerequisites:
 * NodeJS 16.14.0 (use nvm for this)
