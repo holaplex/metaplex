@@ -11,6 +11,23 @@ import { Identicon, shortenAddress, getTwitterHandle, useConnection } from '@oys
 import { Popover, Transition, Dialog } from '@headlessui/react';
 import { CheckIcon, DuplicateIcon, XIcon } from '@heroicons/react/outline';
 import classNames from 'classnames';
+import gql from 'graphql-tag';
+import { useGQLQuery } from './UseGQLQuery';
+
+
+
+
+const GET_PROFILEPIC = gql `
+query walletProfile($handle: String!) {
+  profile(handle: $handle) {
+    handle
+    profileImageUrlLowres
+    profileImageUrlHighres
+    bannerImageUrl
+  }
+}
+`
+
 
 export const Banner = ({
   src,
@@ -49,8 +66,29 @@ export const Banner = ({
     </button>
   );
 
+  const TwitPic = ({ twh }: { twh?: string }) => {
+    
+  const { data, isLoading, error } = useGQLQuery('handle', GET_PROFILEPIC, {
+    handle: twh
+  })
+  if (isLoading) console.log('Loading...');
+  if (error) console.log('Error');
+  
+ const imgurl = `${data?.profile?.profileImageUrlHighres}`
+  
+ return (
+   <div className='rounded-full overflow-hidden'> <img src={imgurl} alt="" /> </div> 
+ )
+
+ }
+
+  
+
+  
+
   const CreatedByAvatars = ({ className }: { className?: string }) => (
     <div onClick={openModal} className={'flex cursor-pointer items-center ' + className}>
+      
       <div> Created by </div>
 
       <div className="flex -space-x-2 overflow-hidden pl-2">
@@ -100,8 +138,16 @@ export const Banner = ({
                       className={classNames('flex items-center', pOpen && 'z-50')}
 
                       // onMouseLeave={() => setPOpen(false)}
-                    >
-                      <Identicon size={22} address={creatorAddress} />
+                    > 
+                    
+                      
+                    {
+                       (creatorTwitterHandle!=undefined && creatorTwitterHandle!=null)? 
+                        <TwitPic twh={creatorTwitterHandle} /> 
+                       : 
+                       <Identicon size={22} address={creatorAddress} />
+                    }
+                    
                     </Popover.Button>
 
                     <Transition
